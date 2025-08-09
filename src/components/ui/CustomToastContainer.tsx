@@ -22,11 +22,11 @@ function CustomCloseButton({ closeToast }: any) {
     );
 }
 
-export default function CustomToastContainer() {
+export default function CustomToastContainer({ autoClose = 4000 }: { autoClose?: number }) {
     return (
         <ToastContainer
             position="top-center"
-            autoClose={4000}
+            autoClose={autoClose}
             hideProgressBar={false}
             newestOnTop={false}
             closeOnClick={false}
