@@ -8,7 +8,7 @@ const PlayerNamesModal = ({ visible, onSubmit, initialNames = ['Player 1', 'Play
   const [player2, setPlayer2] = useState(initialNames[1] || 'Player 2');
 
   const lastClickTimeRef = useRef(0); // track last click time
-  const cooldown = 4500; // 4.5 seconds
+  const cooldown = 4000; // 4 seconds
 
   useEffect(() => {
     setPlayer1(initialNames[0] || 'Player 1');

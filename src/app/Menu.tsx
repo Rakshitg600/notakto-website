@@ -25,7 +25,7 @@ const Menu = () => {
 
   // Store the last time the toast was shown
   const lastToastTimeRef = useRef(0);
-  const toastCooldown = 4500; // 4.5 seconds
+  const toastCooldown = 4000; // 4 seconds
 
   const handleSignIn = async () => {
     try {
