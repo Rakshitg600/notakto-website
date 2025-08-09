@@ -10,42 +10,33 @@ const vt323 = VT323({
 });
 
 
-export function CustomToastContainer() {
+function CustomCloseButton({ closeToast }: any) {
+    // even tho the react-toastify has its own features --- we cant customise it to our retro style needs
     return (
-        <>
-            <ToastContainer
-                position="top-center"
-                autoClose={4000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick={false}
-                rtl={false}
-                pauseOnFocusLoss={true}
-                draggable={true}
-                pauseOnHover={true}
-                closeButton={false}
-                toastClassName="custom-toast"
-            />
-            {/*  since the toast and progress bar are together therefore we choose the last element and add margin bottom    */}
-            {/*  for some reason tailwind code doesnt work */}
-            <style jsx global>{`
-                .Toastify__toast-container .Toastify__toast:not(:last-child) { 
-                margin-bottom: 12px;
-                }
-                .custom-toast {
-                width: 300px;
-                background: black;
-                color: white;
-                border: 1px solid #00ffff;
-                border-radius: 6px;
-                padding: 12px 16px;
-                font-family: 'VT323', monospace;
-                font-size: 22px;
-                text-align: center;
-                box-shadow: 0 0 12px #00ffff;
-                letter-spacing: 0.1em;
-                }`}
-            </style>
-        </>
+        <button
+            onClick={closeToast} //. react-toastify closeToast function
+            className="text-white hover:text-cyan-200 transition-colors"
+        >
+            ✖
+        </button>
+    );
+}
+
+export default function CustomToastContainer() {
+    return (
+        <ToastContainer
+            position="top-center"
+            autoClose={4000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick={false}
+            rtl={false}
+            pauseOnFocusLoss={false}
+            draggable={true}
+            pauseOnHover={false}
+            closeButton={CustomCloseButton}
+            toastClassName="!w-[350px] !bg-black !text-white border border-cyan-400 rounded-lg !px-4 !py-3 !font-mono !text-xl !text-center flex items-center justify-between shadow-cyan-400 !shadow-lg !tracking-widest !mb-3 !pb-2 !relative" // This forces the properties on the existing tailwind classes 
+        //progressClassName="bg-cyan-400 absolute bottom-0 left-0 h-1"
+        />
     );
 }
