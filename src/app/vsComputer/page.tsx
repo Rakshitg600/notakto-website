@@ -13,7 +13,7 @@ import DifficultyModal from '@/modals/DifficultyModal';
 import { toast } from "react-toastify";
 import { useToastCooldown } from "@/components/hooks/useToastCooldown";
 import { handleBuyCoins } from '@/services/payment';
-import { SettingButton } from '@/components/ui/SettingButton';
+import { SettingButton } from '@/components/ui/Buttons/SettingButton';
 import { createGame, makeMove, resetGame, updateConfig, undoMove, skipMove } from '@/services/game-apis';
 
 const Game = () => {
@@ -243,7 +243,10 @@ const Game = () => {
                         <span className="text-red-600 text-[35px] ">Coins: {Coins}</span>
                         <span className="text-red-600 text-[35px] "> | XP: {XP}</span>
                     </div>
-                    <h2 className="text-red-600 text-[80px] mb-5 text-center">{currentPlayer == 1 ? "You" : "Computer"}</h2>
+                    <h2 className="text-red-600 text-[80px] mb-5 text-center">
+  {currentPlayer === 1 ? "Your Turn" : "Computer's Turn"}
+</h2>
+
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-4 p-4 w-full mb-20">

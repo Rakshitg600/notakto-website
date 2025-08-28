@@ -3,17 +3,15 @@
 import { useRouter } from 'next/navigation';
 import { signInWithGoogle, signOutUser } from '@/services/firebase';
 import { useUser, useMute, useTut } from '@/services/store';
-import TutorialModal from '../modals/TutorialModal';
 import { toast } from "react-toastify";
 import { useToastCooldown } from "@/components/hooks/useToastCooldown";
-import { MenuButton } from '@/components/ui/MenuButton';
+import { MenuButton } from '@/components/ui/Buttons/MenuButton';
 
 const Menu = () => {
   const user = useUser((state) => state.user);
   const setUser = useUser((state) => state.setUser);
   const mute = useMute((state) => state.mute);
   const setMute = useMute((state) => state.setMute);
-  const showTut = useTut((state) => state.showTut);
   const setShowTut = useTut((state) => state.setShowTut);
 
   const router = useRouter();
@@ -60,7 +58,6 @@ const Menu = () => {
         <MenuButton onClick={() => setShowTut(true)}> Tutorial </MenuButton>
         <MenuButton onClick={(user)?handleSignOut:handleSignIn}> {(user)?"Sign Out":"Sign in"} </MenuButton>
         <MenuButton onClick={() => setMute(!mute)}>Sound: {mute ? 'Off' : 'On'}</MenuButton>
-        {showTut && <TutorialModal />}
       </div>
     </div>
   );

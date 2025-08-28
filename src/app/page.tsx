@@ -3,8 +3,10 @@ import { useEffect, useRef } from 'react';
 
 // Components
 import Menu from '@/app/Menu';
+import TutorialModal from '@/modals/TutorialModal';
 
-import { useUser, useMute } from '@/services/store';
+import { useUser, useMute,useTut } from '@/services/store';
+
 import { initBackgroundMusic, toggleBackgroundMusic, stopBackgroundMusic } from '@/services/sounds';
 
 // Firebase module
@@ -13,6 +15,7 @@ import { onAuthStateChangedListener } from '@/services/firebase';
 export default function Home() {
   const mute = useMute((state) => state.mute);
   const setUser = useUser((state) => state.setUser);
+  const showTut = useTut((state)=>state.showTut);
   // Init music
   useEffect(() => {
     initBackgroundMusic(mute);
@@ -39,6 +42,7 @@ export default function Home() {
   return (
     <div className="flex-1 bg-gray-100">
       <Menu />
+      {showTut && <TutorialModal />}
     </div>
   );
 }
