@@ -17,7 +17,9 @@ import { handleBuyCoins } from '@/services/payment';
 import { SettingButton } from '@/components/ui/Buttons/SettingButton';
 import SoundConfigModal from '@/modals/SoundConfigModal';
 import { createGame, makeMove, resetGame, updateConfig, undoMove, skipMove } from '@/services/game-apis';
+import { TOAST_DURATION } from '@/constants/toast';
 import { useSound } from '@/services/store';
+
 const Game = () => {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [boards, setBoards] = useState<BoardState[]>([]);
@@ -48,7 +50,7 @@ const Game = () => {
     const XP = useXP((state) => state.XP);
     const user = useUser((state) => state.user);
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-    const { canShowToast, triggerToastCooldown } = useToastCooldown(4000);
+    const { canShowToast, triggerToastCooldown } = useToastCooldown(TOAST_DURATION);
     const router = useRouter();
 
     const initGame = async (num: BoardNumber, size: BoardSize, diff: DifficultyLevel) => {
