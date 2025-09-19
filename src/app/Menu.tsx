@@ -68,6 +68,7 @@ const Menu = () => {
       <SoundConfigModal visible={showSoundConfig} onClose={() => setShowSoundConfig(false)} />
       <ShortcutModal visible={showShortcutConfig} onClose={() => setshowShortcutConfig(false)} />
     </MenuContainer >
+    );
 };
 
 export default Menu;
