@@ -18,8 +18,9 @@ const BoardConfigModal = ({
   if (!visible) return null;
 
   return (
-    <dialog open className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-      <section className="bg-black p-6 w-[90%] max-w-xl text-center space-y-6" role="dialog" aria-modal="true">
+     <dialog open aria-labelledby="board-config-title" className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+     <section className="bg-black p-6 w-[90%] max-w-xl text-center space-y-6">
+     <h1 id="board-config-title" className="sr-only">Board configuration</h1>
         
         <header>
           <h2 className="text-red-600 text-[35px]">Number of Boards</h2>
