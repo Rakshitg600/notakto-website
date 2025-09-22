@@ -41,23 +41,24 @@ const BoardConfigModal = ({
           </ul>
         </div>
 
-        <header>
-          <h2 className="text-red-600 text-[35px]">Board Size</h2>
-        </header>
+   <div>
+  <h2 className="text-red-600 text-[35px]">Board Size</h2>
 
-        <nav aria-label="Select board size">
-          <ul className="flex flex-wrap gap-2 justify-center">
-            {[2, 3, 4, 5].map(size => (
-              <li key={size}>
-                <BoardConfigButton
-                  label={`${size}x${size}`}
-                  isActive={selectedSize === size}
-                  onClick={() => setSelectedSize(size)}
-                />
-              </li>
-            ))}
-          </ul>
-        </nav>
+  <div role="group" aria-label="Select board size">
+    <ul className="flex flex-wrap gap-2 justify-center">
+      {[1, 2, 3, 4, 5].map(num => (
+        <li key={num}>
+          <BoardConfigButton
+            label={num}
+            isActive={selectedBoards === num}
+            onClick={() => setSelectedBoards(num)}
+          />
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
+
 
         <footer className="flex gap-4 pt-2 justify-center">
           <BoardActionButton onClick={onCancel}>
