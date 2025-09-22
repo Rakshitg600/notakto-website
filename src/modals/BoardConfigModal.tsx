@@ -26,7 +26,8 @@ const BoardConfigModal = ({
           <h2 className="text-red-600 text-[35px]">Number of Boards</h2>
         </header>
         
-        <nav aria-label="Select number of boards">
+        <div role="group" aria-label="Select number of boards">
+
           <ul className="flex flex-wrap gap-2 justify-center">
             {[1, 2, 3, 4, 5].map(num => (
               <li key={num}>
@@ -38,7 +39,7 @@ const BoardConfigModal = ({
               </li>
             ))}
           </ul>
-        </nav>
+        </div>
 
         <header>
           <h2 className="text-red-600 text-[35px]">Board Size</h2>
