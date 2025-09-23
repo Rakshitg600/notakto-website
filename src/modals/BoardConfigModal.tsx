@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react';
-import { BoardConfigModalProps } from '../services/types';
+import { BoardConfigModalProps, BoardNumber } from '../services/types';
 import { BoardConfigButton } from '@/components/ui/Buttons/BoardConfigButton';
 import { BoardActionButton } from '@/components/ui/Buttons/BoardActionButton';
 
@@ -12,7 +12,7 @@ const BoardConfigModal = ({
   onCancel
 }: BoardConfigModalProps) => {
   const [selectedBoards, setSelectedBoards] = useState<number>(currentBoards);
-  const [selectedSize, setSelectedSize] = useState<number>(currentSize);
+  const [selectedSize, setSelectedSize] = useState<BoardNumber>(currentSize as BoardNumber);
 
   if (!visible) return null;
 
@@ -56,7 +56,7 @@ const BoardConfigModal = ({
                   <BoardConfigButton
                     label={`${size}x${size}`}
                     isActive={selectedSize === size}
-                    onClick={() => setSelectedSize(size)}
+                    onClick={() => setSelectedSize(size as BoardNumber)}
                   />
                 </li>
               ))}
