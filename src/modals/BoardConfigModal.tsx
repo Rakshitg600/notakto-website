@@ -12,11 +12,16 @@ const BoardConfigModal = ({
   onCancel
 }: BoardConfigModalProps) => {
   const [selectedBoards, setSelectedBoards] = useState<number>(currentBoards);
-  const [selectedSize, setSelectedSize] = useState<BoardNumber>(currentSize as BoardNumber);
-
-  if (!visible) return null;
 
   const boardSizes: BoardNumber[] = [2, 3, 4, 5];
+
+  const initialSize = boardSizes.includes(currentSize as BoardNumber)
+    ? (currentSize as BoardNumber)
+    : 2;
+
+  const [selectedSize, setSelectedSize] = useState<BoardNumber>(initialSize);
+
+  if (!visible) return null;
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
