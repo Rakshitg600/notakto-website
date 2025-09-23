@@ -11,7 +11,10 @@ const BoardConfigModal = ({
   onConfirm,
   onCancel
 }: BoardConfigModalProps) => {
+  // Number of boards can stay as number
   const [selectedBoards, setSelectedBoards] = useState<number>(currentBoards);
+  
+  // Board size must strictly be BoardNumber
   const [selectedSize, setSelectedSize] = useState<BoardNumber>(currentSize as BoardNumber);
 
   if (!visible) return null;
@@ -51,12 +54,12 @@ const BoardConfigModal = ({
           <h2 className="text-red-600 text-[35px]">Board Size</h2>
           <div role="group" aria-label="Select board size">
             <ul className="flex flex-wrap gap-2 justify-center">
-              {[2, 3, 4, 5].map(size => (
+              {[2, 3, 4, 5].map((size: BoardNumber) => (
                 <li key={size}>
                   <BoardConfigButton
                     label={`${size}x${size}`}
                     isActive={selectedSize === size}
-                    onClick={() => setSelectedSize(size as BoardNumber)}
+                    onClick={() => setSelectedSize(size)}
                   />
                 </li>
               ))}
