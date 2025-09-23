@@ -4,6 +4,13 @@ import { BoardConfigModalProps, BoardNumber } from '../services/types';
 import { BoardConfigButton } from '@/components/ui/Buttons/BoardConfigButton';
 import { BoardActionButton } from '@/components/ui/Buttons/BoardActionButton';
 
+const boardSizes: BoardNumber[] = [2, 3, 4, 5];
+
+// Type guard: ensures number is BoardNumber
+function isBoardNumber(n: number): n is BoardNumber {
+  return boardSizes.includes(n as BoardNumber);
+}
+
 const BoardConfigModal = ({
   visible,
   currentBoards,
@@ -13,12 +20,8 @@ const BoardConfigModal = ({
 }: BoardConfigModalProps) => {
   const [selectedBoards, setSelectedBoards] = useState<number>(currentBoards);
 
-  const boardSizes: BoardNumber[] = [2, 3, 4, 5];
-
-  const initialSize = boardSizes.includes(currentSize as BoardNumber)
-    ? (currentSize as BoardNumber)
-    : 2;
-
+  // validate currentSize; fallback to 2 if invalid
+  const initialSize = isBoardNumber(currentSize) ? currentSize : 2;
   const [selectedSize, setSelectedSize] = useState<BoardNumber>(initialSize);
 
   if (!visible) return null;
@@ -35,7 +38,6 @@ const BoardConfigModal = ({
           Board configuration
         </h1>
 
-        {/* Number of Boards */}
         <header>
           <h2 className="text-red-600 text-[35px]">Number of Boards</h2>
         </header>
@@ -53,7 +55,6 @@ const BoardConfigModal = ({
           </ul>
         </div>
 
-        {/* Board Size */}
         <div>
           <h2 className="text-red-600 text-[35px]">Board Size</h2>
           <div role="group" aria-label="Select board size">
@@ -71,7 +72,6 @@ const BoardConfigModal = ({
           </div>
         </div>
 
-        {/* Footer Buttons */}
         <footer className="flex gap-4 pt-2 justify-center">
           <BoardActionButton onClick={onCancel}>
             Cancel
