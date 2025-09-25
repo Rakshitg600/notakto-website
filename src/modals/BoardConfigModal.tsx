@@ -1,39 +1,42 @@
 'use client'
-import { useState } from 'react';
-import { BoardConfigModalProps, BoardNumber } from '../services/types';
+import { useEffect, useRef, useState } from 'react';
+import { BoardConfigModalProps, BoardNumber, BoardSize } from '../services/types';
 import { BoardConfigButton } from '@/components/ui/Buttons/BoardConfigButton';
 import { BoardActionButton } from '@/components/ui/Buttons/BoardActionButton';
 
-const boardSizes: BoardNumber[] = [2, 3, 4, 5];
+const boardSizes: BoardSize[] = [2, 3, 4, 5];
 
-// Type guard: ensures number is BoardNumber
+const boardCounts: BoardNumber[] = [1, 2, 3, 4, 5];
+ 
+// Type guards
 function isBoardNumber(n: number): n is BoardNumber {
-  return boardSizes.includes(n as BoardNumber);
+  return (boardCounts as ReadonlyArray<number>).includes(n);
+}
+function isBoardSize(n: number): n is BoardSize {
+  return (boardSizes as ReadonlyArray<number>).includes(n);
 }
 
-const BoardConfigModal = ({
-  visible,
-  currentBoards,
-  currentSize,
-  onConfirm,
-  onCancel
-}: BoardConfigModalProps) => {
-  const [selectedBoards, setSelectedBoards] = useState<BoardNumber>(currentBoards);
+
+  const [selectedBoards, setSelectedBoards] = useState<BoardNumber>(
+    isBoardNumber(currentBoards) ? currentBoards : 1
+  );
 
   // validate currentSize; fallback to 2 if invalid
-  const initialSize = isBoardNumber(currentSize) ? currentSize : 2;
-  const [selectedSize, setSelectedSize] = useState<BoardNumber>(initialSize);
+  const initialSize = isBoardSize(currentSize) ? currentSize : 2;
+  const [selectedSize, setSelectedSize] = useState<BoardSize>(initialSize);
 
   if (!visible) return null;
 
+
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="board-config-title"
-        className="bg-black p-6 w-[90%] max-w-xl text-center space-y-6 rounded-lg shadow-xl"
-      >
+    <dialog
+      ref={dialogRef}
+      aria-labelledby="board-config-title"
+      className="z-50 rounded-lg shadow-xl p-0"
+    >
+      <section className="bg-black p-6 w-[90%] max-w-xl text-center space-y-6">
+      </section>
+   </dialog>
         <h1 id="board-config-title" className="sr-only">
           Board configuration
         </h1>
