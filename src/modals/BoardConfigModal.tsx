@@ -18,7 +18,7 @@ const BoardConfigModal = ({
   onConfirm,
   onCancel
 }: BoardConfigModalProps) => {
-  const [selectedBoards, setSelectedBoards] = useState<number>(currentBoards);
+  const [selectedBoards, setSelectedBoards] = useState<BoardNumber>(currentBoards);
 
   // validate currentSize; fallback to 2 if invalid
   const initialSize = isBoardNumber(currentSize) ? currentSize : 2;
