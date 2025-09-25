@@ -17,13 +17,13 @@ function isBoardSize(n: number): n is BoardSize {
 }
 
 
-  const [selectedBoards, setSelectedBoards] = useState<BoardNumber>(
-    isBoardNumber(currentBoards) ? currentBoards : 1
-  );
+ const [selectedBoards, setSelectedBoards] = useState<BoardNumber>(
+  isBoardNumber(currentBoards) ? currentBoards : 1 as BoardNumber
+);
 
-  // validate currentSize; fallback to 2 if invalid
-  const initialSize = isBoardSize(currentSize) ? currentSize : 2;
-  const [selectedSize, setSelectedSize] = useState<BoardSize>(initialSize);
+const initialSize: BoardSize = isBoardSize(currentSize) ? currentSize : 2 as BoardSize;
+const [selectedSize, setSelectedSize] = useState<BoardSize>(initialSize);
+
 
   if (!visible) return null;
 
