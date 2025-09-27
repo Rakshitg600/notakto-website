@@ -1,6 +1,8 @@
 //TODO: recheck all types and interfaces for any possible improvements/strictness
 //TODO: abstract common fields into base interfaces and inheriting with Omit/Pick as needed
 
+import type { ReactNode } from 'react';
+
 export type BoardState = Array<string>;
 export type GameMode = 'vsComputer' | 'vsPlayer' | 'liveMatch' | null;
 export type DifficultyLevel = 1 | 2 | 3 | 4 | 5;
@@ -149,4 +151,14 @@ export interface AnimatedTitleProps {
   className?: string;
   // Optional class for inner text element (color/size overrides)
   textClassName?: string;
+}
+
+// Menu container props
+export interface MenuContainerProps {
+  children: ReactNode;
+}
+
+export interface MenuButtonContainerProps {
+  children: ReactNode;
+  className?: string;
 }

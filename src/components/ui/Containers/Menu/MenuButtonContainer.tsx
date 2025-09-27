@@ -1,14 +1,15 @@
-import { ReactNode } from "react";
+import { MenuButtonContainerProps } from '@/services/types';
+import clsx from 'clsx';
 
-interface MenuButtonContainerProps {
-    children: ReactNode;
-}
-
-export default function MenuButtonContainer({ children }: MenuButtonContainerProps) {
+export default function MenuButtonContainer({ children, className }: MenuButtonContainerProps) {
     return (
-            <div className="flex flex-col items-center gap-4 w-full">
-                {children}
-            </div>
-
+        <div className={clsx(
+            "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full",
+            "sm:gap-6 lg:gap-8",
+            "items-stretch justify-items-stretch",
+            className
+        )}>
+            {children}
+        </div>
     );
 }

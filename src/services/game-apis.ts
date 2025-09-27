@@ -9,6 +9,7 @@ export async function createGame(
   idToken: string
 ): Promise<newGame | errorResponse> {
   try {
+    console.log('Creating game with token length:', idToken.length);
     const response = await fetch(`${API_BASE}/create`, {
       method: 'POST',
       headers: { 
@@ -17,6 +18,18 @@ export async function createGame(
       },
       body: JSON.stringify({ numberOfBoards, boardSize, difficulty })
     });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Create game API HTTP error:', response.status, errorText);
+      
+      if (response.status === 401) {
+        return { success: false, error: 'Authentication failed. Please sign in again.' };
+      }
+      
+      return { success: false, error: `API Error: ${response.status} ${errorText}` };
+    }
+    
     return await response.json();
   } catch (error) {
     console.error('Create game API error:', error);
@@ -39,6 +52,18 @@ export async function makeMove(
       },
       body: JSON.stringify({ sessionId, boardIndex, cellIndex })
     });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Make move API HTTP error:', response.status, errorText);
+      
+      if (response.status === 401) {
+        return { success: false, error: 'Authentication failed. Please sign in again.' };
+      }
+      
+      return { success: false, error: `API Error: ${response.status} ${errorText}` };
+    }
+    
     return await response.json();
   } catch (error) {
     console.error('Make move API error:', error);

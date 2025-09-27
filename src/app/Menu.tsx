@@ -57,7 +57,7 @@ const Menu = () => {
   return (
     <MenuContainer>
       <MenuTitle text='Notakto'></MenuTitle>
-      <MenuButtonContainer>
+      <MenuButtonContainer className="max-w-3xl mx-auto">
         <MenuButton onClick={() => startGame('vsPlayer')}> Play vs Player </MenuButton>
         <MenuButton onClick={() => startGame('vsComputer')}> Play vs Computer </MenuButton>
         <MenuButton onClick={() => startGame('liveMatch')}> Live Match </MenuButton>

@@ -1,6 +1,7 @@
-'use client'
+'use client';
 
 import { useEffect, useState } from 'react';
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import Board from './Board';
 import { BoardSize, BoardState, DifficultyLevel, BoardNumber } from '@/services/types';
 import { isBoardDead } from '@/services/logic';
@@ -17,7 +18,6 @@ import { handleBuyCoins } from '@/services/payment';
 import { SettingButton } from '@/components/ui/Buttons/SettingButton';
 import SoundConfigModal from '@/modals/SoundConfigModal';
 import { createGame, makeMove, resetGame, updateConfig, undoMove, skipMove } from '@/services/game-apis';
-import { TOAST_DURATION } from '@/constants/toast';
 import { useSound } from '@/services/store';
 
 const Game = () => {
@@ -50,35 +50,88 @@ const Game = () => {
     const XP = useXP((state) => state.XP);
     const user = useUser((state) => state.user);
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-    const { canShowToast, triggerToastCooldown, resetCooldown } = useToastCooldown(TOAST_DURATION);
+    const { canShowToast, triggerToastCooldown, resetCooldown } = useToastCooldown(4000);
     const router = useRouter();
+
+    // Helper function to safely get ID token with hydration fallback and caching
+    let cachedToken: string | null = null;
+    let tokenFetchedAt = 0;
+    const TOKEN_TTL_MS = 60_000; // 60s soft TTL
+
+    const getIdTokenSafe = async (): Promise<string | null> => {
+        let activeUser = user;
+
+        // Zustand store hydration fallback
+        if (!activeUser) {
+            const auth = getAuth();
+            activeUser = await new Promise<User | null>((resolve) => {
+                const unsubscribe = onAuthStateChanged(auth, (current) => {
+                    unsubscribe();
+                    resolve(current);
+                });
+            });
+        }
+
+        if (!activeUser) {
+            console.log('No user found in getIdTokenSafe');
+            toast.error('User not authenticated');
+            router.push('/');
+            return null;
+        }
+
+        // Use cached token if it is still fresh
+        const now = Date.now();
+        if (cachedToken && (now - tokenFetchedAt) < TOKEN_TTL_MS) {
+            return cachedToken;
+        }
+
+        try {
+            // Refresh user state and force refresh to get the latest token
+            await activeUser.reload();
+            let token = await activeUser.getIdToken();
+            if (!token) {
+                token = await activeUser.getIdToken(true);
+            }
+
+            if (!token) {
+                throw new Error('Failed to get token - token is null');
+            }
+
+            cachedToken = token;
+            tokenFetchedAt = now;
+            return token;
+        } catch (tokenError) {
+            console.error('Token acquisition failed:', tokenError);
+            toast.error('Authentication session expired. Please sign in again.');
+            router.push('/');
+            return null;
+        }
+    };
 
     const initGame = async (num: BoardNumber, size: BoardSize, diff: DifficultyLevel) => {
         if (isInitializing) return;
         setIsInitializing(true);
 
         try {
-            if (user) {
-                const data = await createGame(num, size, diff, await user.getIdToken());
-                if (data.success && data.gameState) {
-                    setSessionId(data.sessionId);
-                    setBoards(data.gameState.boards);
-                    setCurrentPlayer(data.gameState.currentPlayer);
-                    setBoardSize(data.gameState.boardSize);
-                    setNumberOfBoards(data.gameState.numberOfBoards);
-                    setDifficulty(data.gameState.difficulty);
-                    setGameHistory(data.gameState.gameHistory);
-                } else if ('error' in data) {
-                    toast.error(data.error || 'Failed to create game');
-                } else {
-                    toast.error('Unexpected response from server');
-                }
-            }
-            else {
-                toast.error('User not authenticated');
-                router.push('/');
+            const idToken = await getIdTokenSafe();
+            if (!idToken) return;
+
+            const data = await createGame(num, size, diff, idToken);
+            if (data.success && data.gameState) {
+                setSessionId(data.sessionId);
+                setBoards(data.gameState.boards);
+                setCurrentPlayer(data.gameState.currentPlayer);
+                setBoardSize(data.gameState.boardSize);
+                setNumberOfBoards(data.gameState.numberOfBoards);
+                setDifficulty(data.gameState.difficulty);
+                setGameHistory(data.gameState.gameHistory);
+            } else if ('error' in data) {
+                toast.error(data.error || 'Failed to create game');
+            } else {
+                toast.error('Unexpected response from server');
             }
         } catch (error) {
+            console.error('Game initialization error:', error);
             toast.error('Error initializing game');
             router.push('/');
         } finally {
@@ -90,27 +143,25 @@ const Game = () => {
         if (isProcessing) return;
         setIsProcessing(true);
         try {
-            if (user) {
-                const data = await makeMove(sessionId, boardIndex, cellIndex, await user.getIdToken());
-                if (data.success) {
-                    setBoards(data.gameState.boards);
-                    setCurrentPlayer(data.gameState.currentPlayer);
-                    setGameHistory(data.gameState.gameHistory);
-                    playMoveSound(sfxMute);
+            const idToken = await getIdTokenSafe();
+            if (!idToken) return;
 
-                    if (data.gameOver) {
-                        setWinner(data.gameState.winner);
-                        setShowWinnerModal(true);
-                        playWinSound(sfxMute);
-                    }
-                } else if ('error' in data) {
-                    toast.error(data.error || 'Invalid move');
-                } else {
-                    toast.error('Unexpected response from server');
+            const data = await makeMove(sessionId, boardIndex, cellIndex, idToken);
+            if (data.success) {
+                setBoards(data.gameState.boards);
+                setCurrentPlayer(data.gameState.currentPlayer);
+                setGameHistory(data.gameState.gameHistory);
+                playMoveSound(sfxMute);
+
+                if (data.gameOver) {
+                    setWinner(data.gameState.winner);
+                    setShowWinnerModal(true);
+                    playWinSound(sfxMute);
                 }
+            } else if ('error' in data) {
+                toast.error(data.error || 'Invalid move');
             } else {
-                toast.error('User not authenticated');
-                router.push('/');
+                toast.error('Unexpected response from server');
             }
         } catch (error) {
             toast.error('Error making move');
@@ -124,23 +175,20 @@ const Game = () => {
         setIsResetting(true);
 
         try {
-            if (user) {
-                const data = await resetGame(sessionId, await user.getIdToken());
-                if (data.success) {
-                    setBoards(data.gameState.boards);
-                    setCurrentPlayer(data.gameState.currentPlayer);
-                    setGameHistory(data.gameState.gameHistory);
-                    setWinner('');
-                    setShowWinnerModal(false);
-                } else if ('error' in data) {
-                    toast.error(data.error || 'Failed to reset game');
-                } else {
-                    toast.error('Unexpected response from server');
-                }
-            }
-            else {
-                toast.error('User not authenticated');
-                router.push('/');
+            const idToken = await getIdTokenSafe();
+            if (!idToken) return;
+
+            const data = await resetGame(sessionId, idToken);
+            if (data.success) {
+                setBoards(data.gameState.boards);
+                setCurrentPlayer(data.gameState.currentPlayer);
+                setGameHistory(data.gameState.gameHistory);
+                setWinner('');
+                setShowWinnerModal(false);
+            } else if ('error' in data) {
+                toast.error(data.error || 'Failed to reset game');
+            } else {
+                toast.error('Unexpected response from server');
             }
         } catch (error) {
             toast.error('Error resetting game');
@@ -157,21 +205,18 @@ const Game = () => {
         setIsUndoing(true);
 
         try {
-            if (user) {
-                const data = await undoMove(sessionId, await user.getIdToken());
-                if (data.success) {
-                    setBoards(data.gameState.boards);
-                    setCurrentPlayer(data.gameState.currentPlayer);
-                    setGameHistory(data.gameState.gameHistory);
-                } else if ('error' in data) {
-                    toast.error(data.error || 'Failed to undo move');
-                } else {
-                    toast.error('Unexpected response from server');
-                }
-            }
-            else {
-                toast.error('User not authenticated');
-                router.push('/');
+            const idToken = await getIdTokenSafe();
+            if (!idToken) return;
+
+            const data = await undoMove(sessionId, idToken);
+            if (data.success) {
+                setBoards(data.gameState.boards);
+                setCurrentPlayer(data.gameState.currentPlayer);
+                setGameHistory(data.gameState.gameHistory);
+            } else if ('error' in data) {
+                toast.error(data.error || 'Failed to undo move');
+            } else {
+                toast.error('Unexpected response from server');
             }
         } catch (error) {
             toast.error('Error undoing move');
@@ -188,26 +233,23 @@ const Game = () => {
         setIsSkipping(true);
 
         try {
-            if (user) {
-                const data = await skipMove(sessionId, await user.getIdToken());
-                if (data.success) {
-                    setBoards(data.gameState.boards);
-                    setCurrentPlayer(data.gameState.currentPlayer);
-                    setGameHistory(data.gameState.gameHistory);
-                    if (data.gameOver) {
-                        setWinner(data.gameState.winner);
-                        setShowWinnerModal(true);
-                        playWinSound(sfxMute);
-                    }
-                } else if ('error' in data) {
-                    toast.error(data.error || 'Failed to skip move');
-                } else {
-                    toast.error('Unexpected response from server');
+            const idToken = await getIdTokenSafe();
+            if (!idToken) return;
+
+            const data = await skipMove(sessionId, idToken);
+            if (data.success) {
+                setBoards(data.gameState.boards);
+                setCurrentPlayer(data.gameState.currentPlayer);
+                setGameHistory(data.gameState.gameHistory);
+                if (data.gameOver) {
+                    setWinner(data.gameState.winner);
+                    setShowWinnerModal(true);
+                    playWinSound(sfxMute);
                 }
-            }
-            else {
-                toast.error('User not authenticated');
-                router.push('/');
+            } else if ('error' in data) {
+                toast.error(data.error || 'Failed to skip move');
+            } else {
+                toast.error('Unexpected response from server');
             }
         } catch (error) {
             toast.error('Error skipping move');
@@ -221,23 +263,20 @@ const Game = () => {
         setIsUpdatingConfig(true);
 
         try {
-            if (user) {
-                const data = await updateConfig(sessionId, newNumberOfBoards, newBoardSize, difficulty, await user.getIdToken());
-                if (data.success) {
-                    setNumberOfBoards(newNumberOfBoards);
-                    setBoardSize(newBoardSize);
-                    setBoards(data.gameState.boards);
-                    setCurrentPlayer(data.gameState.currentPlayer);
-                    setGameHistory(data.gameState.gameHistory);
-                } else if ('error' in data) {
-                    toast.error(data.error || 'Failed to update config');
-                } else {
-                    toast.error('Unexpected response from server');
-                }
-            }
-            else {
-                toast.error('User not authenticated');
-                router.push('/');
+            const idToken = await getIdTokenSafe();
+            if (!idToken) return;
+
+            const data = await updateConfig(sessionId, newNumberOfBoards, newBoardSize, difficulty, idToken);
+            if (data.success) {
+                setNumberOfBoards(newNumberOfBoards);
+                setBoardSize(newBoardSize);
+                setBoards(data.gameState.boards);
+                setCurrentPlayer(data.gameState.currentPlayer);
+                setGameHistory(data.gameState.gameHistory);
+            } else if ('error' in data) {
+                toast.error(data.error || 'Failed to update config');
+            } else {
+                toast.error('Unexpected response from server');
             }
         } catch (error) {
             toast.error('Error updating config');
@@ -251,22 +290,19 @@ const Game = () => {
         setIsUpdatingDifficulty(true);
 
         try {
-            if (user) {
-                const data = await updateConfig(sessionId, numberOfBoards, boardSize, level, await user.getIdToken());
-                if (data.success) {
-                    setDifficulty(level);
-                    setBoards(data.gameState.boards);
-                    setCurrentPlayer(data.gameState.currentPlayer);
-                    setGameHistory(data.gameState.gameHistory);
-                } else if ('error' in data) {
-                    toast.error(data.error || 'Failed to update difficulty');
-                } else {
-                    toast.error('Unexpected response from server');
-                }
-            }
-            else {
-                toast.error('User not authenticated');
-                router.push('/');
+            const idToken = await getIdTokenSafe();
+            if (!idToken) return;
+
+            const data = await updateConfig(sessionId, numberOfBoards, boardSize, level, idToken);
+            if (data.success) {
+                setDifficulty(level);
+                setBoards(data.gameState.boards);
+                setCurrentPlayer(data.gameState.currentPlayer);
+                setGameHistory(data.gameState.gameHistory);
+            } else if ('error' in data) {
+                toast.error(data.error || 'Failed to update difficulty');
+            } else {
+                toast.error('Unexpected response from server');
             }
         } catch (error) {
             toast.error('Error updating difficulty');
@@ -290,7 +326,6 @@ const Game = () => {
                     <h2 className="text-red-600 text-[80px] mb-5 text-center">
                         {currentPlayer === 1 ? "Your Turn" : "Computer's Turn"}
                     </h2>
-
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-4 p-4 w-full mb-20">
