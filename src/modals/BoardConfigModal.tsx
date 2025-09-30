@@ -1,13 +1,12 @@
-'use client'
+'use client';
 import { useEffect, useRef, useState } from 'react';
 import { BoardConfigModalProps, BoardNumber, BoardSize } from '../services/types';
 import { BoardConfigButton } from '@/components/ui/Buttons/BoardConfigButton';
 import { BoardActionButton } from '@/components/ui/Buttons/BoardActionButton';
 
 const boardSizes: BoardSize[] = [2, 3, 4, 5];
-
 const boardCounts: BoardNumber[] = [1, 2, 3, 4, 5];
- 
+
 // Type guards
 function isBoardNumber(n: number): n is BoardNumber {
   return (boardCounts as ReadonlyArray<number>).includes(n);
@@ -16,17 +15,25 @@ function isBoardSize(n: number): n is BoardSize {
   return (boardSizes as ReadonlyArray<number>).includes(n);
 }
 
+export default function BoardConfigModal({
+  visible,
+  currentBoards,
+  currentSize,
+  onCancel,
+  onConfirm
+}: BoardConfigModalProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
- const [selectedBoards, setSelectedBoards] = useState<BoardNumber>(
-  isBoardNumber(currentBoards) ? currentBoards : 1 as BoardNumber
-);
+  const [selectedBoards, setSelectedBoards] = useState<BoardNumber>(
+    isBoardNumber(currentBoards) ? currentBoards : (1 as BoardNumber)
+  );
 
-const initialSize: BoardSize = isBoardSize(currentSize) ? currentSize : 2 as BoardSize;
-const [selectedSize, setSelectedSize] = useState<BoardSize>(initialSize);
-
+  const initialSize: BoardSize = isBoardSize(currentSize)
+    ? currentSize
+    : (2 as BoardSize);
+  const [selectedSize, setSelectedSize] = useState<BoardSize>(initialSize);
 
   if (!visible) return null;
-
 
   return (
     <dialog
@@ -35,8 +42,6 @@ const [selectedSize, setSelectedSize] = useState<BoardSize>(initialSize);
       className="z-50 rounded-lg shadow-xl p-0"
     >
       <section className="bg-black p-6 w-[90%] max-w-xl text-center space-y-6">
-      </section>
-   </dialog>
         <h1 id="board-config-title" className="sr-only">
           Board configuration
         </h1>
@@ -46,7 +51,7 @@ const [selectedSize, setSelectedSize] = useState<BoardSize>(initialSize);
         </header>
         <div role="group" aria-label="Select number of boards">
           <ul className="flex flex-wrap gap-2 justify-center">
-            {[1, 2, 3, 4, 5].map(num => (
+            {boardCounts.map(num => (
               <li key={num}>
                 <BoardConfigButton
                   label={num}
@@ -76,9 +81,7 @@ const [selectedSize, setSelectedSize] = useState<BoardSize>(initialSize);
         </div>
 
         <footer className="flex gap-4 pt-2 justify-center">
-          <BoardActionButton onClick={onCancel}>
-            Cancel
-          </BoardActionButton>
+          <BoardActionButton onClick={onCancel}>Cancel</BoardActionButton>
 
           <BoardActionButton
             onClick={() => onConfirm(selectedBoards, selectedSize)}
@@ -86,9 +89,7 @@ const [selectedSize, setSelectedSize] = useState<BoardSize>(initialSize);
             Apply
           </BoardActionButton>
         </footer>
-      </div>
-    </div>
+      </section>
+    </dialog>
   );
-};
-
-export default BoardConfigModal;
+}
