@@ -1,202 +1,199 @@
-# 🤝 Contributing to Notakto
+# Contributing to Notakto
 
-Welcome, and thank you for contributing to **Notakto**. Notakto is a nostalgic, strategy-focused variant of tic-tac-toe with multiplayer, AI, and an in-game economy.
+Thank you for contributing to Notakto! This guide covers project-specific setup, workflows, and standards based on feedback from previous pull requests.
 
-If this is your first time contributing to an open source project, see [Your First Pull Request][1].
+**New to open source?** See [Google's Open Source Contributing Guide](https://opensource.google/documentation/reference/contributing) and [GitHub's How to Contribute](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project).
 
-## 🛠️ Development Setup
-
-Assuming you have cloned the repository, follow these steps to set up your development environment:
+## Getting Started
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or higher)
-- [pnpm](https://pnpm.io/installation)
+- Node.js v18+
+- pnpm ([installation guide](https://pnpm.io/installation))
 
-### Quick Start
-
-**Install the Dependencies**
+### Local Development
 
 ```bash
-pnpm install:all 
-```
+# Install dependencies
+pnpm install:all
 
-**One command to start everything:**
-
-```bash
+# Start everything (Next.js + Socket.IO server)
 pnpm dev:local
 ```
 
-This automatically:
-- Installs all dependencies for both main app and socket server
-- Starts Next.js development server (http://localhost:3000)
-- Starts Socket.IO server (http://localhost:8000)
-- Enables hot reload for both servers
+This runs:
+- Next.js app on `http://localhost:3000`
+- Socket.IO server on `http://localhost:8000`
 
-**Alternative commands:**
-
-```bash
-# Start only Next.js app
-pnpm dev
-```
-
-> If you're working on **Live Match** features, run the Socket.IO server separately:
+**Working on Live Match features only?**
 
 ```bash
 cd notakto-socket-server && pnpm start
 ```
 
-## 🧪 Testing
+## Project-Specific Standards
 
-We use **Jest** and **React Testing Library**.
+These guidelines are based on actual feedback from merged and reviewed PRs. Following them will help your PR get approved faster.
 
-```bash
-# Run all tests
-pnpm test
+### PR Title & Description
 
-# Check coverage
-pnpm test -- --coverage
+#### Write descriptive PR titles that match what you actually changed
+- ❌ **Bad**: "implemented queue customHook" (describes generic implementation, not the actual changes)
+- ❌ **Bad**: "Ctrehan/96.2" (just branch name + issue number)
+- ❌ **Bad**: "db-to-server" (too terse)
+- ❌ **Bad**: "test solution of PR-166" (references ticket, not change)
+- ✅ **Good**: "Implement custom toast hook and toast store for toast management"
+- ✅ **Good**: "Refactor BoardConfigModal to use semantic HTML tags and ARIA roles"
+- ✅ **Good**: "Move database operations to server-side REST API module"
+- **Why**: Title must highlight the main purpose/enhancement to accurately reflect what changed
 
-# Lint code
-pnpm lint
-```
+#### Ensure title matches the actual changeset
+- If your PR adds a custom toast hook, toast store, and toast management logic, say that - don't just say "implemented queue customHook"
+- The mismatch between generic titles and actual changes misleads reviewers about the primary purpose
 
----
+#### Always include a PR description
+- Briefly outline the purpose and key details of your changes
+- Help reviewers understand what the PR addresses and why
+- Example: "This PR adds rate limiting middleware to prevent API abuse during live matches"
 
-## 🔄 Pull Request Process
+### Workflow: Focus on One Issue at a Time
 
-This repository uses the [GitHub flow][2] workflow. It uses [forks][3] and [branches][4] for an easy-to-follow collaborating experience.
+#### Don't work on multiple issues simultaneously
+- Pick one issue, fix it with focus, then move to the next
+- Close all PRs except the one you're actively working on
+- Get yourself unassigned from issues you're not working on
+- **Why**: Maintains quality and helps you complete work rather than starting many things
 
-1. Ask a repository maintainer to assign you to an issue. The issue can be an existing one, or you can create a new issue to address your proposed changes.
-1. Make all changes to a `feature` branch in your forked repository.
-1. Update the `README.md` file or appropriate files in the `docs` folder with your change's details.
-1. Create a pull request with a description of what you changed and why you changed it.
-1. After a reviewer approves and merges your pull request, delete the feature branch from this repository.
+### PR Scope: Stay Focused
 
-Always run the project's automated tests and check your changes in the app before you create a pull request.
+#### Don't include unrelated changes
+- If the issue asks for semantic HTML improvements, don't add type guards or whitespace-only edits in unrelated files
+- Remove or defer changes that aren't specified in the linked issue
+- Keep PRs focused exclusively on what the issue specifies
+- **Why**: Mixing concerns makes review harder and increases chance of bugs
 
-### Quality Assurance
+#### Clean up your git diff before submitting
+- Review your git diff carefully and remove all irrelevant changes
+- Common issues: whitespace-only changes, unrelated file modifications, debugging code
+- **Why**: Makes review easier and keeps git history clean
 
-Before creating a pull request, ensure your changes meet our quality standards:
+### Firebase Configuration
 
-```bash
-# Run automated tests
-pnpm test
+#### Use correct Next.js environment variable prefix
+- ❌ **Wrong**: `FIREBASE_API_KEY` (unprefixed)
+- ✅ **Right**: `NEXT_PUBLIC_FIREBASE_API_KEY` (prefixed)
+- **Why**: Next.js only exposes env vars with `NEXT_PUBLIC_` prefix to the frontend; unprefixed vars are `undefined` at runtime and break Firebase initialization
 
-# Check code formatting and style
-pnpm lint
+#### Don't make optional fields mandatory
+- `measurementId` is optional (only for Analytics)
+- Forcing all Firebase env vars to be required crashes the app in dev/preview when Analytics isn't configured
 
-# Verify the application runs correctly
-pnpm dev:local
-```
+#### Keep documentation consistent
+- Different docs should not contradict each other about which Firebase auth providers to enable
+- Update all related docs and screenshots together before merge
 
-All tests must pass and the application must run without errors before you create a pull request.
+#### Scope setup instructions clearly
+- Mark advanced/optional steps as "(Optional)" with context
+- Example: Firebase Service Account setup is optional (only for Admin SDK/server scripts)
+- Don't mention unrelated APIs (like Coinbase) in Firebase setup docs
 
-### Docker Testing (Optional)
+### Semantic HTML & Accessibility
 
-To test your changes in a production-like environment:
+#### Actually implement what the issue requests
+- If an issue asks for semantic tag replacements, the diff should show `<div>` → `<dialog>`, `<span>` → `<header>`, etc.
+- Don't just add type guards without doing the semantic refactoring
 
-1. Install [Docker Desktop][11] and start the Docker Engine.
-2. Build and run the application:
+#### Modal dialogs require proper ARIA attributes
+- Add `role="dialog"`, `aria-modal="true"`, and `aria-labelledby="[id]"` to modal containers
+- **Why**: Screen reader users won't get proper modal context without these
 
-    ```bash
-    docker-compose up --build
-    ```
+### UI Component Patterns
 
-This builds both the web frontend and socket server, then starts the services on ports `3000` and `8000` respectively.
+#### Don't add guard functions without triggers
+- If you add a check like `canShowToast()`, ensure you also call the corresponding trigger like `triggerToastCooldown()`
+- **Why**: Creates dead code and confuses maintainers about intended behavior
 
-## 📦 Project Structure Overview
+#### Always restore state in useEffect cleanup
+- If you set `body.style.overflow = "hidden"` (for scroll lock), restore it in the cleanup function
+- ❌ **Problem**: Setting `body.style.overflow` but not restoring it when component unmounts leaves the body locked
+- ✅ **Solution**: Add cleanup that restores the original value or sets it back to `"auto"`
+- **Pattern**: Store the original value, then restore it in the return function of `useEffect`
 
-The project follows a modern Next.js architecture:
+### Web Audio API
+
+#### Always clean up audio nodes
+- Creating hover sound nodes without cleanup causes memory leaks
+- Disconnect nodes when done (add cleanup in `useEffect` return or after use)
+- Route gain through shared variables so volume APIs affect the synthetic audio path
+
+### Documentation Coverage
+
+**Maintain 80%+ docstring coverage**
+- Run `@coderabbitai generate docstrings` to improve coverage before submitting
+
+### CodeRabbit Suggestions
+
+The project uses CodeRabbit AI for automated PR reviews. These suggestions are helpful but not mandatory:
+- Acknowledge good suggestions and check if they're helpful
+- You don't need to implement every suggestion
+- Use your judgment on what improves the code
+
+## File Structure
 
 ```text
 src/
-├── app/                   # Next.js route-based pages (vsComputer, vsPlayer, liveMatch)
-├── modals/                # Modal components for UI flows
-├── services/              # Core logic, AI engine, Zustand store, Firebase, etc.
+├── app/              # Next.js pages (vsComputer, vsPlayer, liveMatch)
+├── modals/           # Modal components
+├── services/         # Business logic, AI, stores, Firebase
+│   ├── logic.ts      # Core game rules
+│   ├── ai.ts         # AI decision engine
+│   ├── firebase.ts   # All Firebase operations
+│   └── stores/       # Zustand state stores
+
 notakto-socket-server/
-├── livematch.js           # Socket.IO live multiplayer server (Node.js)
+├── livematch.js      # Socket.IO multiplayer server
 ```
 
-## 💡 Contribution Ideas
+#### Where to put new code:
+- Game logic → `services/logic.ts`
+- AI improvements → `services/ai.ts`
+- UI components → `app/` or `modals/`
+- State management → `services/stores/`
 
-You can help in many ways:
+## Before Submitting a PR
 
-* :books: Improve documentation
-* :brain: Optimize AI or game logic
-* :speech_balloon: Enhance UI/UX (modals, layout, gameboard)
-* :test_tube: Write or improve test coverage
-* :bug: Fix bugs or handle edge cases
+**Required checks:**
+```bash
+pnpm test          # All tests pass
+pnpm dev:local     # App runs without errors
+```
 
-Check the [issues][9] tab and milestones for open tasks.
+## Docker Testing (Optional)
 
-## 🧹 Code Style & Guidelines
+Test in a production-like environment:
 
-Follow these guidelines to maintain code quality and consistency:
+```bash
+docker-compose up --build
+```
 
-### General Standards
-* Format your code with **Prettier**
-* Check your formatting with `pnpm lint` before committing
-* Use **TypeScript** exclusively
-* Avoid using the `any` type - prefer proper type definitions
-* Write meaningful commit messages following conventional commit format
+Requires [Docker Desktop](https://docs.docker.com/desktop/) with Docker Engine running.
 
-### Naming Conventions
-* Use `camelCase` for variables and functions
-* Use `PascalCase` for components and types
-* Use `UPPER_SNAKE_CASE` for constants
-* Use descriptive names that explain purpose
+## Need Help?
 
-### Code Organization
-* Favor functional components with hooks over class components
-* Keep logic modular and reusable - see the `services/` folder structure
-* Separate concerns: UI components, business logic, and data management
-* Use custom hooks for reusable stateful logic
+- Open a draft PR early for feedback
+- Comment on issues for clarification
+- Ask questions - they help us improve the docs
 
-### State Management
-* Use separate Zustand stores for different domains (coins, XP, player, game state)
-* Reuse logic from `services/logic.ts` and `ai.ts` wherever possible
-* Keep Firebase operations centralized in `services/firebase.ts`
+Your questions are valuable. Don't hesitate to reach out.
 
-### Testing
-* Write unit tests for utility functions and business logic
-* Write integration tests for complex user flows
-* Maintain test coverage above 80%
-* Mock external dependencies in tests
-
-## 🙋 We're Happy to Help
-
-Don't hesitate to ask questions, whether you need help setting up, understanding a file, raising an issue, or fixing a bug. You're absolutely welcome to reach out.
-
-> **Note:** We don't expect you to understand everything perfectly. In fact, your questions help us improve the project and documentation.
-
-You're always welcome to:
-* Open a draft PR early and ask for feedback
-* Comment on issues for clarification
-* Ask for help with setup or technical issues
-* Request code reviews for learning purposes
-* Suggest improvements to our processes
-
-If something is confusing, that's valuable feedback - feel free to open a discussion or comment anywhere.
-
-## 📚 Additional Resources
+## Resources
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [Jest Testing Framework](https://jestjs.io/docs/getting-started)
+- [Jest Testing](https://jestjs.io/docs/getting-started)
 - [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+- [Zustand Guide](https://zustand-demo.pmnd.rs/)
 
-Thanks again for being part of Notakto! 🎮
+---
 
-[1]: ./FIRST_PR.md
-[2]: https://docs.github.com/en/get-started/using-github/github-flow
-[3]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/about-forks
-[4]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-branches
-[5]: ./package.json
-[6]: https://localhost:3000
-[7]: https://jestjs.io/
-[8]: https://testing-library.com/docs/react-testing-library/intro/
-[9]: https://github.com/rakshitg600/notakto-website/issues
-[10]: https://github.com/Rakshitg600/notakto-website/issues/13
-[11]: https://docs.docker.com/desktop/
-
+Thanks for contributing to Notakto! 🎮
