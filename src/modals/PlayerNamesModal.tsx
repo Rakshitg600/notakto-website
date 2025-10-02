@@ -6,7 +6,11 @@ import { useToastCooldown } from "@/components/hooks/useToastCooldown";
 import { TOAST_DURATION, TOAST_IDS } from "@/constants/toast";
 import { PlayerInput } from '@/components/ui/Inputs/PlayerInput';
 
-const PlayerNamesModal = ({ visible, onSubmit, initialNames = ['Player 1', 'Player 2'] }: PlayerNamesModalProps) => {
+const PlayerNamesModal = ({
+  visible,
+  onSubmit,
+  initialNames = ['Player 1', 'Player 2'],
+}: PlayerNamesModalProps) => {
   const [player1, setPlayer1] = useState(initialNames[0] || 'Player 1');
   const [player2, setPlayer2] = useState(initialNames[1] || 'Player 2');
 
@@ -39,20 +43,17 @@ const PlayerNamesModal = ({ visible, onSubmit, initialNames = ['Player 1', 'Play
       <div className="bg-black w-[80%] max-w-md p-6 text-center shadow-lg">
         <h2 className="text-red-500 text-3xl mb-6">Enter Player Names</h2>
         <div className='mb-6 gap-4 flex flex-col'>
-
           <PlayerInput
             value={player1}
             onChange={(e) => setPlayer1(e.target.value)}
             placeholder="Player 1 Name"
           />
-
           <PlayerInput
             value={player2}
             onChange={(e) => setPlayer2(e.target.value)}
             placeholder="Player 2 Name"
           />
         </div>
-
         <button
           onClick={handleSubmit}
           className="bg-blue-600 text-white text-3xl w-full py-3 hover:bg-blue-700"
