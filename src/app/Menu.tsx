@@ -58,7 +58,7 @@ const Menu = () => {
   };
 
   return (
-    <MenuContainer>
+<MenuContainer>
       <MenuTitle text='Notakto'></MenuTitle>
       <MenuButtonContainer>
         <MenuButton onClick={() => startGame('vsPlayer')}> Play vs Player </MenuButton>
@@ -72,7 +72,7 @@ const Menu = () => {
       <SoundConfigModal visible={showSoundConfig} onClose={() => setShowSoundConfig(false)} />
       <ShortcutModal visible={showShortcutConfig} onClose={() => setshowShortcutConfig(false)} />
     </MenuContainer >
-  );
+    );
 };
 
 export default Menu;
