@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  // output: 'standalone', // Commented out for Windows build compatibility
   images: {
     unoptimized: false,
     minimumCacheTTL: 60,

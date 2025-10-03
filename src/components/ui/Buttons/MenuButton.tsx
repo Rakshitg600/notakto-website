@@ -8,7 +8,20 @@ export function MenuButton({
     return (
         <button
             className={clsx(
-                "w-full bg-blue-600 py-4 text-white text-3xl", // default styles
+                // Base styles
+                "w-full min-h-[3.5rem] py-4 px-6",
+                // Background and colors
+                "bg-blue-600 hover:bg-blue-700 active:bg-blue-800",
+                "text-white font-medium",
+                // Typography - responsive text sizes
+                "text-lg sm:text-xl lg:text-2xl",
+                // Transitions and effects
+                "transition-all duration-200 ease-in-out",
+                "hover:scale-105 active:scale-95",
+                // Border and shadows
+                "rounded-lg shadow-lg hover:shadow-xl",
+                // Focus states
+                "focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2",
                 className // merge any custom classes passed in
             )}
             {...props}
