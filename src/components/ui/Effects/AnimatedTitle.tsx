@@ -10,7 +10,7 @@ export function AnimatedTitle({ text, className = "", textClassName = "" }: Anim
     <h1
       aria-label={text}
       className={[
-        "select-none text-6xl md:text-7xl lg:text-8xl tracking-widest",
+        "select-none text-center tracking-widest",
         "text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]",
         "relative inline-block",
         // subtle glow pulse
