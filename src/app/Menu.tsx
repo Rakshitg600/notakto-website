@@ -13,6 +13,7 @@ import { MenuTitle } from '@/components/ui/Title/MenuTitle';
 import SoundConfigModal from '@/modals/SoundConfigModal';
 import ShortcutModal from '@/modals/ShortcutModal';
 import { useState } from 'react';
+import { ConfirmationModal } from '@/modals/ConfirmationModal';
 
 const Menu = () => {
   const user = useUser((state) => state.user);
@@ -23,6 +24,8 @@ const Menu = () => {
   const { canShowToast, triggerToastCooldown, resetCooldown } = useToastCooldown(TOAST_DURATION);
   const [showSoundConfig, setShowSoundConfig] = useState<boolean>(false);
   const [showShortcutConfig, setshowShortcutConfig] = useState<boolean>(false);
+  const [showConfirmationModal, setshowConfirmationModal] = useState<boolean>(false);
+
 
   const handleSignIn = async () => {
     try {
@@ -65,12 +68,26 @@ const Menu = () => {
         <MenuButton onClick={() => startGame('vsComputer')}> Play vs Computer </MenuButton>
         <MenuButton onClick={() => startGame('liveMatch')}> Live Match </MenuButton>
         <MenuButton onClick={() => setShowTut(true)}> Tutorial </MenuButton>
-        <MenuButton onClick={(user) ? handleSignOut : handleSignIn}>{(user) ? "Sign Out" : "Sign in"}</MenuButton>
+        <MenuButton onClick={(user) ? () => setshowConfirmationModal(true) : handleSignIn}>{(user) ? "Sign Out" : "Sign in"}</MenuButton>
         <MenuButton onClick={() => setShowSoundConfig(!showSoundConfig)}>Adjust Sound</MenuButton>
         <MenuButton onClick={() => setshowShortcutConfig(!showShortcutConfig)}>Keyboard Shortcuts</MenuButton>
       </MenuButtonContainer >
       <SoundConfigModal visible={showSoundConfig} onClose={() => setShowSoundConfig(false)} />
       <ShortcutModal visible={showShortcutConfig} onClose={() => setshowShortcutConfig(false)} />
+      <ConfirmationModal
+        visible={showConfirmationModal}
+        confirmText="Yes"
+        cancelText="No"
+        title="Confirm Sign Out"
+        message="Are you sure you want to Sign Out?"
+        onConfirm={() => {
+          handleSignOut();
+          setshowConfirmationModal(false);
+        }}
+        onCancel={() => {
+          setshowConfirmationModal(false);
+        }}
+      />
     </MenuContainer >
   );
 };

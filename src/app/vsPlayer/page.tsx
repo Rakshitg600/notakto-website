@@ -12,6 +12,7 @@ import WinnerModal from '@/modals/WinnerModal';
 import SoundConfigModal from '@/modals/SoundConfigModal';
 import BoardConfigModal from '@/modals/BoardConfigModal';
 import { SettingButton } from '@/components/ui/Buttons/SettingButton';
+import { ConfirmationModal } from '@/modals/ConfirmationModal';
 
 const Game = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,6 +27,8 @@ const Game = () => {
     const [numberOfBoards, setNumberOfBoards] = useState<number>(3);
     const [showBoardConfig, setShowBoardConfig] = useState<boolean>(false);
     const [showSoundConfig, setShowSoundConfig] = useState<boolean>(false);
+    const [showConfirmationModal, setshowConfirmationModal] = useState<boolean>(false);
+    const [showMenuConfirmation, setShowMenuConfirmation] = useState<boolean>(false);
 
     const { sfxMute } = useSound();
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -106,11 +109,11 @@ const Game = () => {
             {isMenuOpen && (
                 <div className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-60 z-[9999] flex items-center justify-center px-4 overflow-y-auto">
                     <div className="flex flex-wrap justify-center gap-4 max-w-4xl py-8">
-                        <SettingButton onClick={() => { resetGame(numberOfBoards, boardSize); setIsMenuOpen(false); }}>Reset</SettingButton>
+                        <SettingButton onClick={() => { setshowConfirmationModal(true); setIsMenuOpen(false)}}>Reset</SettingButton>
                         <SettingButton onClick={() => { setShowBoardConfig(!showBoardConfig); setIsMenuOpen(false); }}>Game Configuration</SettingButton>
                         <SettingButton onClick={() => { setShowNameModal(true); setIsMenuOpen(false); }}>Reset Names</SettingButton>
                         <SettingButton onClick={() => { setShowSoundConfig(true); setIsMenuOpen(false) }}>Adjust Sound</SettingButton>
-                        <SettingButton onClick={exitToMenu}>Main Menu</SettingButton>
+                        <SettingButton onClick={() => {setShowMenuConfirmation(true);setIsMenuOpen(false);}}>Main Menu</SettingButton>
                         <SettingButton onClick={toggleMenu}>Return to Game</SettingButton>
                     </div>
                 </div>
@@ -148,6 +151,36 @@ const Game = () => {
             <SoundConfigModal
                 visible={showSoundConfig}
                 onClose={() => setShowSoundConfig(false)}
+            />
+            <ConfirmationModal
+                visible={showConfirmationModal}
+                confirmText="Yes, Reset"
+                cancelText="Cancel"
+                title="Confirm Reset"
+                message="Are you sure you want to reset the game?"
+                onConfirm={() => {
+                    resetGame(numberOfBoards, boardSize);
+                    setshowConfirmationModal(false);
+                }}
+                onCancel={() => {
+                    setshowConfirmationModal(false);
+                    setIsMenuOpen(true)
+                }}
+            />
+            <ConfirmationModal
+                visible={showMenuConfirmation}
+                confirmText="Yes, Exit"
+                cancelText="Stay"
+                title="Exit to Main Menu"
+                message="Are you sure you want to leave the game and return to the main menu?"
+                onConfirm={() => {
+                    setShowMenuConfirmation(false);
+                    router.push("/"); // 👈 navigate home
+                }}
+                onCancel={() => {
+                    setShowMenuConfirmation(false);
+                    setIsMenuOpen(false);
+                }}
             />
         </div>
     );
