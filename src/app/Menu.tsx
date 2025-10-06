@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useRouter } from 'next/navigation';
@@ -5,8 +6,9 @@ import { signInWithGoogle, signOutUser } from '@/services/firebase';
 import { useUser, useTut } from '@/services/store';
 import { toast } from "react-toastify";
 import { useToastCooldown } from "@/components/hooks/useToastCooldown";
-import { TOAST_DURATION,TOAST_IDS } from "@/constants/toast";
+import { TOAST_DURATION, TOAST_IDS } from "@/constants/toast";
 import { MenuButton } from '@/components/ui/Buttons/MenuButton';
+import { UtilityButton } from '@/components/ui/Buttons/UtilityButton';
 import MenuContainer from '@/components/ui/Containers/Menu/MenuContainer';
 import MenuButtonContainer from '@/components/ui/Containers/Menu/MenuButtonContainer';
 import { MenuTitle } from '@/components/ui/Title/MenuTitle';
@@ -20,7 +22,7 @@ const Menu = () => {
   const setShowTut = useTut((state) => state.setShowTut);
 
   const router = useRouter();
-  const { canShowToast, triggerToastCooldown, resetCooldown } = useToastCooldown(TOAST_DURATION);
+  const { canShowToast, resetCooldown } = useToastCooldown(TOAST_DURATION);
   const [showSoundConfig, setShowSoundConfig] = useState<boolean>(false);
   const [showShortcutConfig, setshowShortcutConfig] = useState<boolean>(false);
 
@@ -48,9 +50,9 @@ const Menu = () => {
       if (canShowToast()) {
         toast("Please sign in!", {
           toastId: TOAST_IDS.User.SignInError,
-          autoClose: TOAST_DURATION,
-          onClose: resetCooldown // reset cooldown immediately when closed
+          autoClose: TOAST_DURATION
         });
+        resetCooldown(); // <-- start cooldown immediately
       }
       return;
     }
@@ -59,19 +61,35 @@ const Menu = () => {
 
   return (
     <MenuContainer>
-      <MenuTitle text='Notakto'></MenuTitle>
+      {/* --- Utility buttons (top-right, responsive & grouped) --- */}
+      <div className="absolute top-6 right-6 flex flex-wrap gap-3 justify-end max-w-[90%]">
+        <UtilityButton onClick={user ? handleSignOut : handleSignIn}>
+          {user ? "Sign Out" : "Sign In"}
+        </UtilityButton>
+
+        <UtilityButton onClick={() => setShowSoundConfig(!showSoundConfig)}>
+          Sound
+        </UtilityButton>
+
+        <UtilityButton onClick={() => setshowShortcutConfig(!showShortcutConfig)}>
+          Shortcuts
+        </UtilityButton>
+      </div>
+
+      <MenuTitle text='Notakto' />
+
+      {/* --- Central gameplay menu --- */}
       <MenuButtonContainer>
         <MenuButton onClick={() => startGame('vsPlayer')}> Play vs Player </MenuButton>
         <MenuButton onClick={() => startGame('vsComputer')}> Play vs Computer </MenuButton>
         <MenuButton onClick={() => startGame('liveMatch')}> Live Match </MenuButton>
         <MenuButton onClick={() => setShowTut(true)}> Tutorial </MenuButton>
-        <MenuButton onClick={(user) ? handleSignOut : handleSignIn}>{(user) ? "Sign Out" : "Sign in"}</MenuButton>
-        <MenuButton onClick={() => setShowSoundConfig(!showSoundConfig)}>Adjust Sound</MenuButton>
-        <MenuButton onClick={() => setshowShortcutConfig(!showShortcutConfig)}>Keyboard Shortcuts</MenuButton>
-      </MenuButtonContainer >
+      </MenuButtonContainer>
+
+      {/* --- Modals --- */}
       <SoundConfigModal visible={showSoundConfig} onClose={() => setShowSoundConfig(false)} />
       <ShortcutModal visible={showShortcutConfig} onClose={() => setshowShortcutConfig(false)} />
-    </MenuContainer >
+    </MenuContainer>
   );
 };
 
