@@ -16,8 +16,7 @@ const Board: React.FC<BoardProps> = ({
 				style={{
 					gridTemplateColumns: `repeat(${boardSize}, minmax(0, 1fr))`,
 					aspectRatio: "1/1",
-				}}
-			>
+				}}>
 				{boardState.map((cell, cellIndex) => (
 					<Cell
 						key={`${boardIndex}-${cellIndex}-${cell}`} //FIXME: Improve key

@@ -128,32 +128,28 @@ const Game = () => {
 							onClick={() => {
 								resetGame(numberOfBoards, boardSize);
 								setIsMenuOpen(false);
-							}}
-						>
+							}}>
 							Reset
 						</SettingButton>
 						<SettingButton
 							onClick={() => {
 								setShowBoardConfig(!showBoardConfig);
 								setIsMenuOpen(false);
-							}}
-						>
+							}}>
 							Game Configuration
 						</SettingButton>
 						<SettingButton
 							onClick={() => {
 								setShowNameModal(true);
 								setIsMenuOpen(false);
-							}}
-						>
+							}}>
 							Reset Names
 						</SettingButton>
 						<SettingButton
 							onClick={() => {
 								setShowSoundConfig(true);
 								setIsMenuOpen(false);
-							}}
-						>
+							}}>
 							Adjust Sound
 						</SettingButton>
 						<SettingButton onClick={exitToMenu}>Main Menu</SettingButton>

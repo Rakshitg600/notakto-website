@@ -5,5 +5,5 @@ pre-commit:
       run: pnpm exec biome check --write {staged_files}
       # Optional: Exclude build dirs or tests
       exclude: |
-        ^\.next/
-        ^dist/
+        - ^\.next/
+        - ^dist/

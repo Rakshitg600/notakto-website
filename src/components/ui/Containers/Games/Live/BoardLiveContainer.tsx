@@ -11,8 +11,7 @@ const BoardLiveContainer = ({ blocked, children }: BoardLiveContainerProps) => (
 		className={clsx(
 			"w-[300px] h-[300px] flex flex-wrap bg-black",
 			blocked && "opacity-50",
-		)}
-	>
+		)}>
 		{children}
 	</div>
 );

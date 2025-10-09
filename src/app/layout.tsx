@@ -38,8 +38,7 @@ export default function RootLayout({
 				<script
 					async
 					src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4854199776978392"
-					crossOrigin="anonymous"
-				></script>
+					crossOrigin="anonymous"></script>
 				<meta
 					name="google-site-verification"
 					content="lxHtpLX2cDKFEAAabqQ3-9IY-ckiw3KvqM3Z1kNPxRo"

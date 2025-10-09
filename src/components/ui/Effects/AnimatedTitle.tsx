@@ -19,8 +19,7 @@ export function AnimatedTitle({
 				// subtle glow pulse
 				"animate-[titleGlow_2.5s_ease-in-out_infinite]",
 				className,
-			].join(" ")}
-		>
+			].join(" ")}>
 			{/* Foreground text */}
 			<span className={["relative z-10", textClassName].join(" ")}>{text}</span>
 			{/* Soft glow layers (pure CSS, no images) */}

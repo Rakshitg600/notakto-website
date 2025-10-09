@@ -12,13 +12,16 @@
 			"!node_modules",
 			"!dist",
 			"!.next",
-			"!**/*.test.{js,ts,jsx,tsx}",
 			"!**/*.snap"
 		]
 	},
 	"formatter": {
 		"enabled": true,
-		"indentStyle": "tab"
+		"indentStyle": "tab",
+		"bracketSpacing": true,
+		"lineWidth": 80,
+		"formatWithErrors": true,
+		"bracketSameLine": true
 	},
 	"linter": {
 		"enabled": true,
@@ -30,12 +33,15 @@
 					"options": {
 						"patterns": [
 							{
-								"group": ["./*", "../*"],
+								"group": ["./**", "../**"],
 								"message": "Use the @ alias for all internal project imports, even in the same directory."
 							}
 						]
 					}
 				}
+			},
+			"suspicious": {
+				"noIrregularWhitespace": "error"
 			}
 		}
 	},

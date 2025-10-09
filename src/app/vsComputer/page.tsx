@@ -366,8 +366,7 @@ const Game = () => {
 								setIsMenuOpen(false);
 							}}
 							disabled={isResetting}
-							loading={isResetting}
-						>
+							loading={isResetting}>
 							Reset
 						</SettingButton>
 						<SettingButton
@@ -375,8 +374,7 @@ const Game = () => {
 								setShowBoardConfig(true);
 								setIsMenuOpen(false);
 							}}
-							disabled={isUpdatingConfig}
-						>
+							disabled={isUpdatingConfig}>
 							Game Configuration
 						</SettingButton>
 						<SettingButton
@@ -385,8 +383,7 @@ const Game = () => {
 								setIsMenuOpen(false);
 							}}
 							disabled={Coins < 100 || isUndoing}
-							loading={isUndoing}
-						>
+							loading={isUndoing}>
 							Undo (100 coins)
 						</SettingButton>
 						<SettingButton
@@ -395,8 +392,7 @@ const Game = () => {
 								setIsMenuOpen(false);
 							}}
 							disabled={Coins < 200 || isSkipping}
-							loading={isSkipping}
-						>
+							loading={isSkipping}>
 							Skip a Move (200 coins)
 						</SettingButton>
 						<SettingButton
@@ -410,24 +406,21 @@ const Game = () => {
 								)
 							}
 							disabled={isProcessingPayment}
-							loading={isProcessingPayment}
-						>
+							loading={isProcessingPayment}>
 							Buy Coins (100)
 						</SettingButton>
 						<SettingButton
 							onClick={() => {
 								setShowDifficultyModal(true);
 								setIsMenuOpen(false);
-							}}
-						>
+							}}>
 							AI Level: {difficulty}
 						</SettingButton>
 						<SettingButton
 							onClick={() => {
 								setShowSoundConfig(true);
 								setIsMenuOpen(false);
-							}}
-						>
+							}}>
 							Adjust Sound
 						</SettingButton>
 						<SettingButton onClick={() => router.push("/")}>

@@ -21,8 +21,7 @@ const DifficultyModal = ({
 					<DifficultyActionButton
 						variant="level"
 						key={level}
-						onClick={() => onSelect(level)}
-					>
+						onClick={() => onSelect(level)}>
 						Level {level}
 					</DifficultyActionButton>
 				))}
