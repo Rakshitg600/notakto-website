@@ -58,8 +58,7 @@ const BoardConfigModal = ({
 
 				<BoardConfigAction>
 					<BoardActionButton onClick={onCancel}>Cancel</BoardActionButton>
-
-					<BoardActionButton
+<BoardActionButton
 						onClick={() => onConfirm(selectedBoards, selectedSize)}>
 						Apply
 					</BoardActionButton>
