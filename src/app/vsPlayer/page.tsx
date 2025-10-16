@@ -14,6 +14,7 @@ import SettingOverlay from "@/components/ui/Containers/Settings/SettingOverlay";
 import GameLayout from "@/components/ui/Layout/GameLayout";
 import PlayerTurnTitle from "@/components/ui/Title/PlayerTurnTitle";
 import BoardConfigModal from "@/modals/BoardConfigModal";
+import { ConfirmationModal } from "@/modals/ConfirmationModal";
 import PlayerNamesModal from "@/modals/PlayerNamesModal";
 import SoundConfigModal from "@/modals/SoundConfigModal";
 import WinnerModal from "@/modals/WinnerModal";
@@ -35,6 +36,10 @@ const Game = () => {
 	const [numberOfBoards, setNumberOfBoards] = useState<BoardNumber>(3);
 	const [showBoardConfig, setShowBoardConfig] = useState<boolean>(false);
 	const [showSoundConfig, setShowSoundConfig] = useState<boolean>(false);
+	const [showConfirmationModal, setshowConfirmationModal] =
+		useState<boolean>(false);
+	const [showMenuConfirmation, setShowMenuConfirmation] =
+		useState<boolean>(false);
 
 	const { sfxMute } = useSound();
 	const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -126,7 +131,7 @@ const Game = () => {
 					<SettingContainer>
 						<SettingButton
 							onClick={() => {
-								resetGame(numberOfBoards, boardSize);
+								setshowConfirmationModal(true);
 								setIsMenuOpen(false);
 							}}>
 							Reset
@@ -152,7 +157,13 @@ const Game = () => {
 							}}>
 							Adjust Sound
 						</SettingButton>
-						<SettingButton onClick={exitToMenu}>Main Menu</SettingButton>
+						<SettingButton
+							onClick={() => {
+								setShowMenuConfirmation(true);
+								setIsMenuOpen(false);
+							}}>
+							Main Menu
+						</SettingButton>
 						<SettingButton onClick={toggleMenu}>Return to Game</SettingButton>
 					</SettingContainer>
 				</SettingOverlay>
@@ -190,6 +201,36 @@ const Game = () => {
 			<SoundConfigModal
 				visible={showSoundConfig}
 				onClose={() => setShowSoundConfig(false)}
+			/>
+			<ConfirmationModal
+				visible={showConfirmationModal}
+				confirmText="Yes, Reset"
+				cancelText="Cancel"
+				title="Confirm Reset"
+				message="Are you sure you want to reset the game?"
+				onConfirm={() => {
+					resetGame(numberOfBoards, boardSize);
+					setshowConfirmationModal(false);
+				}}
+				onCancel={() => {
+					setshowConfirmationModal(false);
+					setIsMenuOpen(true);
+				}}
+			/>
+			<ConfirmationModal
+				visible={showMenuConfirmation}
+				confirmText="Yes, Exit"
+				cancelText="Stay"
+				title="Exit to Main Menu"
+				message="Are you sure you want to leave the game and return to the main menu?"
+				onConfirm={() => {
+					setShowMenuConfirmation(false);
+					router.push("/"); // 👈 navigate home
+				}}
+				onCancel={() => {
+					setShowMenuConfirmation(false);
+					setIsMenuOpen(false);
+				}}
 			/>
 		</GameLayout>
 	);

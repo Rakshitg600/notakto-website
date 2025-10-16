@@ -19,9 +19,11 @@ import PlayerTurnTitle from "@/components/ui/Title/PlayerTurnTitle";
 import StatLabel from "@/components/ui/Title/StatLabel";
 // import { TOAST_DURATION } from "@/constants/toast";
 import BoardConfigModal from "@/modals/BoardConfigModal";
+import { ConfirmationModal } from "@/modals/ConfirmationModal";
 import DifficultyModal from "@/modals/DifficultyModal";
 import SoundConfigModal from "@/modals/SoundConfigModal";
 import WinnerModal from "@/modals/WinnerModal";
+
 import {
 	createGame,
 	makeMove,
@@ -66,6 +68,10 @@ const Game = () => {
 	const [isSkipping, setIsSkipping] = useState<boolean>(false);
 	const [isUpdatingConfig, setIsUpdatingConfig] = useState<boolean>(false);
 	const [isUpdatingDifficulty, setIsUpdatingDifficulty] =
+		useState<boolean>(false);
+	const [showConfirmationModal, setShowConfirmationModal] =
+		useState<boolean>(false);
+	const [showMenuConfirmation, setShowMenuConfirmation] =
 		useState<boolean>(false);
 
 	const { sfxMute } = useSound();
@@ -362,7 +368,7 @@ const Game = () => {
 					<SettingContainer>
 						<SettingButton
 							onClick={() => {
-								handleReset();
+								setShowConfirmationModal(true);
 								setIsMenuOpen(false);
 							}}
 							disabled={isResetting}
@@ -429,7 +435,12 @@ const Game = () => {
 							}}>
 							Adjust Sound
 						</SettingButton>
-						<SettingButton onClick={() => router.push("/")}>
+
+						<SettingButton
+							onClick={() => {
+								setShowMenuConfirmation(true);
+								setIsMenuOpen(false);
+							}}>
 							Main Menu
 						</SettingButton>
 						<SettingButton onClick={toggleMenu}>Return to Game</SettingButton>
@@ -469,6 +480,36 @@ const Game = () => {
 			<SoundConfigModal
 				visible={showSoundConfig}
 				onClose={() => setShowSoundConfig(false)}
+			/>
+			<ConfirmationModal
+				visible={showConfirmationModal}
+				confirmText="Yes, Reset"
+				cancelText="Cancel"
+				title="Confirm Reset"
+				message="Are you sure you want to reset the game?"
+				onConfirm={async () => {
+					await handleReset();
+					setShowConfirmationModal(false);
+				}}
+				onCancel={() => {
+					setShowConfirmationModal(false);
+					setIsMenuOpen(true);
+				}}
+			/>
+			<ConfirmationModal
+				visible={showMenuConfirmation}
+				confirmText="Yes, Exit"
+				cancelText="Stay"
+				title="Exit to Main Menu"
+				message="Are you sure you want to leave the game and return to the main menu?"
+				onConfirm={() => {
+					setShowMenuConfirmation(false);
+					router.push("/");
+				}}
+				onCancel={() => {
+					setShowMenuConfirmation(false);
+					setIsMenuOpen(false);
+				}}
 			/>
 		</GameLayout>
 	);

@@ -9,6 +9,7 @@ import MenuButtonContainer from "@/components/ui/Containers/Menu/MenuButtonConta
 import MenuContainer from "@/components/ui/Containers/Menu/MenuContainer";
 import { MenuTitle } from "@/components/ui/Title/MenuTitle";
 import { TOAST_DURATION, TOAST_IDS } from "@/constants/toast";
+import { ConfirmationModal } from "@/modals/ConfirmationModal";
 import ShortcutModal from "@/modals/ShortcutModal";
 import SoundConfigModal from "@/modals/SoundConfigModal";
 import { signInWithGoogle, signOutUser } from "@/services/firebase";
@@ -23,6 +24,8 @@ const Menu = () => {
 	const { canShowToast, resetCooldown } = useToastCooldown(TOAST_DURATION);
 	const [showSoundConfig, setShowSoundConfig] = useState<boolean>(false);
 	const [showShortcutConfig, setshowShortcutConfig] = useState<boolean>(false);
+	const [showConfirmationModal, setshowConfirmationModal] =
+		useState<boolean>(false);
 
 	const handleSignIn = async () => {
 		try {
@@ -74,7 +77,8 @@ const Menu = () => {
 					Live Match{" "}
 				</MenuButton>
 				<MenuButton onClick={() => setShowTut(true)}> Tutorial </MenuButton>
-				<MenuButton onClick={user ? handleSignOut : handleSignIn}>
+				<MenuButton
+					onClick={user ? () => setshowConfirmationModal(true) : handleSignIn}>
 					{user ? "Sign Out" : "Sign in"}
 				</MenuButton>
 				<MenuButton onClick={() => setShowSoundConfig(!showSoundConfig)}>
@@ -91,6 +95,20 @@ const Menu = () => {
 			<ShortcutModal
 				visible={showShortcutConfig}
 				onClose={() => setshowShortcutConfig(false)}
+			/>
+			<ConfirmationModal
+				visible={showConfirmationModal}
+				confirmText="Yes"
+				cancelText="No"
+				title="Confirm Sign Out"
+				message="Are you sure you want to Sign Out?"
+				onConfirm={() => {
+					handleSignOut();
+					setshowConfirmationModal(false);
+				}}
+				onCancel={() => {
+					setshowConfirmationModal(false);
+				}}
 			/>
 		</MenuContainer>
 	);
