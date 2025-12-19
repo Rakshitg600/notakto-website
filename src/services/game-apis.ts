@@ -1,7 +1,12 @@
-import z, { ZodError } from "zod";
-import { type SignInResponse, SignInResponseSchema } from "@/services/schema";
+import { ZodError, z } from "zod";
+import {
+	CreateGameResponseSchema,
+	type SignInResponse,
+	SignInResponseSchema,
+} from "@/services/schema";
 import type {
 	BoardSize,
+	BoardState,
 	DifficultyLevel,
 	ErrorResponse,
 	MakeMoveResponse,
@@ -59,6 +64,46 @@ export async function createGame(
 	difficulty: DifficultyLevel,
 	idToken: string,
 ): Promise<NewGameResponse | ErrorResponse> {
+	if (!API_URL) {
+		return { success: false, error: "API_URL not defined" };
+	}
+	try {
+		const response = await fetch(`${API_URL}/create-game`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${idToken}`,
+			},
+			body: JSON.stringify({ numberOfBoards, boardSize, difficulty }),
+		});
+		if (!response.ok) {
+			const text = await response.text().catch(() => "");
+			return {
+				success: false,
+				error: `Create game failed: ${response.status} ${response.statusText} ${text}`,
+			};
+		}
+		const json = await response.json();
+
+		const parsed = CreateGameResponseSchema.safeParse(json);
+		if (!parsed.success) {
+			return { success: false, error: "Invalid response format" };
+		}
+
+		return { success: true, ...parsed.data } as NewGameResponse;
+	} catch (error) {
+		console.error("Create game API error:", error);
+		return { success: false, error: "Failed to create game" };
+	}
+}
+export async function createSession(
+	sessionId: string,
+	boards: BoardState[],
+	numberOfBoards: number,
+	boardSize: BoardSize,
+	difficulty: DifficultyLevel,
+	idToken: string,
+): Promise<NewGameResponse | ErrorResponse> {
 	try {
 		const response = await fetch(`${API_BASE}/create`, {
 			method: "POST",
@@ -66,7 +111,13 @@ export async function createGame(
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${idToken}`,
 			},
-			body: JSON.stringify({ numberOfBoards, boardSize, difficulty }),
+			body: JSON.stringify({
+				sessionId,
+				boards,
+				numberOfBoards,
+				boardSize,
+				difficulty,
+			}),
 		});
 		return await response.json();
 	} catch (error) {

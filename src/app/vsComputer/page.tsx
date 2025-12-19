@@ -18,7 +18,6 @@ import SettingOverlay from "@/components/ui/Containers/Settings/SettingOverlay";
 import GameLayout from "@/components/ui/Layout/GameLayout";
 import PlayerTurnTitle from "@/components/ui/Title/PlayerTurnTitle";
 import StatLabel from "@/components/ui/Title/StatLabel";
-// import { TOAST_DURATION } from "@/constants/toast";
 import BoardConfigModal from "@/modals/BoardConfigModal";
 import ConfirmationModal from "@/modals/ConfirmationModal";
 import DifficultyModal from "@/modals/DifficultyModal";
@@ -27,14 +26,14 @@ import SoundConfigModal from "@/modals/SoundConfigModal";
 import WinnerModal from "@/modals/WinnerModal";
 import {
 	createGame,
+	createSession,
 	makeMove,
 	resetGame,
 	skipMove,
 	undoMove,
 	updateConfig,
 } from "@/services/game-apis";
-import { isBoardDead } from "@/services/logic";
-// import { handleBuyCoins } from "@/services/payment";
+import { convertBoard, isBoardDead } from "@/services/logic";
 import { playMoveSound, playWinSound } from "@/services/sounds";
 import { useCoins, useSound, useUser, useXP } from "@/services/store";
 import type {
@@ -43,6 +42,8 @@ import type {
 	BoardState,
 	ComputerButtonModalType,
 	DifficultyLevel,
+	ErrorResponse,
+	NewGameResponse,
 } from "@/services/types";
 
 const Game = () => {
@@ -139,19 +140,57 @@ const Game = () => {
 		try {
 			if (user) {
 				const data = await createGame(num, size, diff, await user.getIdToken());
-				if (data.success && data.gameState) {
-					setSessionId(data.sessionId);
-					setBoards(data.gameState.boards);
-					setCurrentPlayer(data.gameState.currentPlayer);
-					setBoardSize(data.gameState.boardSize);
-					setNumberOfBoards(data.gameState.numberOfBoards);
-					setDifficulty(data.gameState.difficulty);
-					setGameHistory(data.gameState.gameHistory);
-				} else if ("error" in data) {
-					toast.error(data.error || "Failed to create game");
-				} else {
-					toast.error("Unexpected response from server");
+				// handle API-level errors (ErrorResponse)
+				if (!data || (data as ErrorResponse).success === false) {
+					const err = (data as ErrorResponse) ?? {
+						success: false,
+						error: "Unknown error",
+					};
+					toast.error(`Failed to create game: ${err.error}`);
+					return;
 				}
+
+				// At this point `data` is NewGameResponse
+				const resp = data as NewGameResponse;
+				let newBoards: BoardState[];
+				try {
+					newBoards = convertBoard(
+						resp.boards,
+						resp.numberOfBoards,
+						resp.boardSize,
+					);
+				} catch (error) {
+					toast.error(`Failed to initialize game boards: ${error}`);
+					return;
+				}
+
+				if (newBoards.length === 0) {
+					toast.error("Failed to initialize game boards");
+					return;
+				}
+				const res = await createSession(
+					resp.sessionId,
+					newBoards,
+					resp.numberOfBoards,
+					resp.boardSize,
+					resp.difficulty,
+					await user.getIdToken(),
+				);
+				if (!res || (res as ErrorResponse).success === false) {
+					const err = (res as ErrorResponse) ?? {
+						success: false,
+						error: "Unknown error",
+					};
+					toast.error(`Failed to register action : ${err.error}`);
+					return;
+				}
+				setSessionId(resp.sessionId);
+				setBoards(newBoards);
+				setCurrentPlayer(1);
+				setBoardSize(resp.boardSize);
+				setNumberOfBoards(resp.numberOfBoards);
+				setDifficulty(resp.difficulty);
+				setGameHistory([newBoards]);
 			} else {
 				toast.error("User not authenticated");
 				router.push("/");

@@ -1,24 +1,59 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { gameSessions } from "@/lib/game-sessions";
+
+const CreateGameRequestSchema = z.object({
+	sessionId: z.string().min(1).max(256),
+	boards: z
+		.array(z.array(z.string()).min(1).max(25))
+		.min(1)
+		.max(5)
+		.refine(
+			(boards) => {
+				// Validate all boards have consistent size matching boardSize^2
+				const expectedLength = boards.length > 0 ? boards[0].length : 0;
+				return boards.every((board) => board.length === expectedLength);
+			},
+			{ message: "All boards must have the same size" },
+		),
+	numberOfBoards: z.union([
+		z.literal(1),
+		z.literal(2),
+		z.literal(3),
+		z.literal(4),
+		z.literal(5),
+	]),
+	boardSize: z.union([z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
+	difficulty: z.union([
+		z.literal(1),
+		z.literal(2),
+		z.literal(3),
+		z.literal(4),
+		z.literal(5),
+	]),
+});
 
 export async function POST(request: NextRequest) {
 	try {
-		//VULNERABILITY: type safety needed here else it can be violated by recieving long/big numbers, maybe use zod
-		const { numberOfBoards, boardSize, difficulty } = await request.json();
-		const sessionId = Math.random().toString(36).substring(2);
-
-		const initialBoards = Array(numberOfBoards)
-			.fill(null)
-			.map(() => Array(boardSize * boardSize).fill(""));
+		const body = await request.json();
+		const parsed = CreateGameRequestSchema.safeParse(body);
+		if (!parsed.success) {
+			return NextResponse.json(
+				{ error: "Invalid request data", details: parsed.error.issues },
+				{ status: 400 },
+			);
+		}
+		const { sessionId, boards, numberOfBoards, boardSize, difficulty } =
+			parsed.data;
 
 		const gameState = {
-			boards: initialBoards,
+			boards: boards,
 			currentPlayer: 1 as 1 | 2,
 			winner: "",
 			boardSize,
 			numberOfBoards,
 			difficulty,
-			gameHistory: [initialBoards],
+			gameHistory: [boards],
 			sessionId: sessionId,
 			gameOver: false,
 		};
@@ -27,8 +62,6 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json({
 			success: true,
-			sessionId,
-			gameState,
 		});
 	} catch (error) {
 		console.error("Create game error:", error);
