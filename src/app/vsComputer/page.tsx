@@ -5,11 +5,17 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { useShortcut } from "@/components/hooks/useShortcut";
 import Board from "@/components/ui/Board/Board";
-import GameLayout from "@/components/ui/Layout/GameLayout";
-import GameTopBar, { GameStatusBar } from "@/components/ui/Game/GameTopBar";
-import GameStatsPanel from "@/components/ui/Game/GameStatsPanel";
+import BoardDisplay from "@/components/ui/Game/BoardDisplay";
+import BoardSelector from "@/components/ui/Game/BoardSelector";
 import GameActionBar from "@/components/ui/Game/GameActionBar";
+import GameCenterColumn from "@/components/ui/Game/GameCenterColumn";
+import GameContentArea from "@/components/ui/Game/GameContentArea";
+import GameLeftPanel from "@/components/ui/Game/GameLeftPanel";
+import GameStatsPanel from "@/components/ui/Game/GameStatsPanel";
 import type { MoveLogEntry } from "@/components/ui/Game/GameTopBar";
+import GameTopBar, { GameStatusBar } from "@/components/ui/Game/GameTopBar";
+import WalletBadge from "@/components/ui/Game/WalletBadge";
+import GameLayout from "@/components/ui/Layout/GameLayout";
 import BoardConfigModal from "@/modals/BoardConfigModal";
 import ConfirmationModal from "@/modals/ConfirmationModal";
 import DifficultyModal from "@/modals/DifficultyModal";
@@ -22,6 +28,7 @@ import {
 	skipMove,
 	undoMove,
 } from "@/services/game-apis";
+import { useGlobalModal } from "@/services/globalModal";
 import { convertBoard, isBoardDead } from "@/services/logic";
 import type {
 	MakeMoveResponse,
@@ -30,7 +37,6 @@ import type {
 } from "@/services/schema";
 import { playMoveSound, playWinSound } from "@/services/sounds";
 import { useCoins, useSound, useUser, useXP } from "@/services/store";
-import { useGlobalModal } from "@/services/globalModal";
 import type {
 	BoardNumber,
 	BoardSize,
@@ -58,7 +64,7 @@ const Game = () => {
 	const [currentPlayer, setCurrentPlayer] = useState<number>(1);
 	const [winner, setWinner] = useState<string>("");
 	const [numberOfBoards, setNumberOfBoards] = useState<BoardNumber>(3);
-	const [isProcessingPayment, _setIsProcessingPayment] =
+	const [_isProcessingPayment, _setIsProcessingPayment] =
 		useState<boolean>(false);
 	const [difficulty, setDifficulty] = useState<DifficultyLevel>(1);
 	const sessionIdRef = useRef<string>("");
@@ -124,36 +130,26 @@ const Game = () => {
 
 			c: () => {
 				if (activeModal === "winner") return;
-				activeModal === "boardConfig"
-					? closeModal()
-					: openModal("boardConfig");
+				activeModal === "boardConfig" ? closeModal() : openModal("boardConfig");
 			},
 
 			s: () => {
 				if (activeModal === "winner") return;
-				activeModal === "soundConfig"
-					? closeModal()
-					: openModal("soundConfig");
+				activeModal === "soundConfig" ? closeModal() : openModal("soundConfig");
 			},
 
 			d: () => {
 				if (activeModal === "winner") return;
-				activeModal === "difficulty"
-					? closeModal()
-					: openModal("difficulty");
+				activeModal === "difficulty" ? closeModal() : openModal("difficulty");
 			},
 
 			q: () => {
 				if (activeModal === "winner") return;
-				activeModal === "shortcut"
-					? closeModal()
-					: openModal("shortcut");
+				activeModal === "shortcut" ? closeModal() : openModal("shortcut");
 			},
 			p: () => {
 				if (activeModal === "winner") return;
-				activeModal === "profile"
-					? closeModal()
-					: openModal("profile");
+				activeModal === "profile" ? closeModal() : openModal("profile");
 			},
 		},
 		false,
@@ -267,11 +263,7 @@ const Game = () => {
 				// Detect CPU's move by comparing boards after player's move with API result
 				const afterPlayer = boards.map((board, idx) =>
 					idx === boardIndex
-						? [
-								...board.slice(0, cellIndex),
-								"X",
-								...board.slice(cellIndex + 1),
-							]
+						? [...board.slice(0, cellIndex), "X", ...board.slice(cellIndex + 1)]
 						: [...board],
 				);
 				let cpuBoard = -1;
@@ -424,11 +416,10 @@ const Game = () => {
 				setBoards(newBoards);
 				setCurrentPlayer(1);
 				setGameHistory((prev) => [...prev, newBoards]);
-				// Remove last two moves (player + CPU) from log
-				setMoveLog((prev) => prev.slice(0, Math.max(0, prev.length - 2)));
 
-				// Re-check hasMoveHappened from actual board state after undo
+				// Sync moveLog with board state (source of truth)
 				const remainingMoves = countTotalMoves(newBoards);
+				setMoveLog((prev) => prev.slice(0, remainingMoves));
 				setHasMoveHappened(remainingMoves > 0);
 
 				const token = await user.getIdToken();
@@ -493,6 +484,33 @@ const Game = () => {
 					toast.error("Failed to initialize game boards");
 					return;
 				}
+
+				// Detect CPU's move by comparing boards before/after skip
+				let cpuBoard = -1;
+				let cpuCell = -1;
+				for (let b = 0; b < newBoards.length; b++) {
+					for (let c = 0; c < newBoards[b].length; c++) {
+						if (newBoards[b][c] !== boards[b]?.[c]) {
+							cpuBoard = b;
+							cpuCell = c;
+							break;
+						}
+					}
+					if (cpuBoard >= 0) break;
+				}
+
+				if (cpuBoard >= 0) {
+					setMoveLog((prev) => [
+						...prev,
+						{ player: 2 as const, board: cpuBoard, cell: cpuCell },
+					]);
+					setSelectedBoard(cpuBoard);
+				}
+
+				if (!hasMoveHappened) {
+					setHasMoveHappened(true);
+				}
+
 				setBoards(newBoards);
 				setCurrentPlayer(1);
 				setGameHistory((prev) => [...prev, newBoards]);
@@ -633,9 +651,7 @@ const Game = () => {
 	const playerMoveCount = moveLog.filter((m) => m.player === 1).length;
 	const cpuMoveCount = moveLog.filter((m) => m.player === 2).length;
 	const totalMoves = countTotalMoves(boards);
-	const aliveCount = boards.filter(
-		(b) => !isBoardDead(b, boardSize),
-	).length;
+	const aliveCount = boards.filter((b) => !isBoardDead(b, boardSize)).length;
 
 	return (
 		<GameLayout>
@@ -655,53 +671,17 @@ const Game = () => {
 				mode="vsComputer"
 			/>
 
-			{/* 3-column content: left (coins/xp + board selector) | center (turn + board) | right (stats + log) */}
-			<div className="flex-1 flex gap-4 px-4 min-h-0 overflow-hidden">
-				{/* Left column: Coins/XP + board selector */}
-				<div className="hidden lg:flex w-64 shrink-0 flex-col pt-3">
-					<div className="pixel-border bg-bg2 px-4 py-2.5 flex items-center gap-3 self-start shrink-0">
-						<span className="font-pixel text-[10px] text-accent">
-							{Coins} COINS
-						</span>
-						<span className="font-pixel text-[7px] text-border-pixel">|</span>
-						<span className="font-pixel text-[10px] text-accent">
-							{XP} XP
-						</span>
-					</div>
+			<GameContentArea>
+				<GameLeftPanel topSlot={<WalletBadge coins={Coins} xp={XP} />}>
+					<BoardSelector
+						boards={boards}
+						boardSize={boardSize}
+						selectedBoard={selectedBoard}
+						onSelectBoard={setSelectedBoard}
+					/>
+				</GameLeftPanel>
 
-					{/* Board selector — vertically centered in remaining space */}
-					{boards.length > 1 && (
-						<div className="flex-1 flex flex-col items-end justify-center gap-2.5">
-							{boards.map((board, i) => {
-								const dead = isBoardDead(board, boardSize);
-								const selected = i === selectedBoard;
-								return (
-									<button
-										key={`tab-${i}`}
-										type="button"
-										onClick={() => setSelectedBoard(i)}
-										className={`relative font-pixel text-[10px] px-5 py-3 flex items-center justify-center border-2 cursor-pointer transition-all whitespace-nowrap ${
-											selected
-												? "bg-bg3 border-accent text-cream shadow-[2px_2px_0_var(--color-accent)]"
-												: dead
-													? "bg-bg2 border-border-pixel text-muted"
-													: "bg-bg2 border-border-pixel text-cream-dim hover:text-cream hover:border-accent/50"
-										}`}>
-										BOARD {i + 1}
-										<span
-											className={`absolute -top-1.5 -right-1.5 w-3.5 h-3.5 border border-bg0 ${
-												dead ? "bg-dead" : "bg-success"
-											}`}
-										/>
-									</button>
-								);
-							})}
-						</div>
-					)}
-				</div>
-
-				{/* Center column: turn info + board (both centered on same axis) */}
-				<div className="flex-1 flex flex-col items-center min-h-0">
+				<GameCenterColumn>
 					<GameStatusBar
 						currentPlayer={currentPlayer as 1 | 2}
 						moveCount={totalMoves}
@@ -710,23 +690,19 @@ const Game = () => {
 						player1Name="You"
 						player2Name="CPU"
 					/>
+					<BoardDisplay visible={boards.length > 0 && !!boards[selectedBoard]}>
+						{boards[selectedBoard] && (
+							<Board
+								boardIndex={selectedBoard}
+								boardState={boards[selectedBoard]}
+								makeMove={handleMove}
+								isDead={isBoardDead(boards[selectedBoard], boardSize)}
+								boardSize={boardSize}
+							/>
+						)}
+					</BoardDisplay>
+				</GameCenterColumn>
 
-					{boards.length > 0 && boards[selectedBoard] && (
-						<div className="flex-1 flex items-center justify-center w-full p-4">
-							<div className="max-w-[520px] w-full">
-								<Board
-									boardIndex={selectedBoard}
-									boardState={boards[selectedBoard]}
-									makeMove={handleMove}
-									isDead={isBoardDead(boards[selectedBoard], boardSize)}
-									boardSize={boardSize}
-								/>
-							</div>
-						</div>
-					)}
-				</div>
-
-				{/* Right column: match stats + move log */}
 				<GameStatsPanel
 					stats={[
 						{ label: "TOTAL MOVES", value: totalMoves },
@@ -736,7 +712,7 @@ const Game = () => {
 					moveLog={moveLog}
 					boardSize={boardSize}
 				/>
-			</div>
+			</GameContentArea>
 
 			{/* Sticky action bar */}
 			<GameActionBar

@@ -1,13 +1,13 @@
 "use client";
 
-import type { CSSProperties } from "react";
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSidebar } from "@/services/sidebar";
-import { useGlobalModal } from "@/services/globalModal";
-import { useUser } from "@/services/store";
+import type { CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import { signInWithGoogle, signOutUser } from "@/services/firebase";
+import { useGlobalModal } from "@/services/globalModal";
+import { useSidebar } from "@/services/sidebar";
+import { useUser } from "@/services/store";
 
 function SidebarTooltip({
 	label,
@@ -22,10 +22,12 @@ function SidebarTooltip({
 	return (
 		<div
 			className="fixed z-[9999] whitespace-nowrap bg-panel border-2 border-border-pixel px-3 py-2 font-pixel text-[7px] text-cream shadow-[2px_2px_0_var(--color-bg0)] pointer-events-none animate-slide-up sidebar-tooltip-pos"
-			style={{
-				"--tooltip-left": `${anchorRect.right + 8}px`,
-				"--tooltip-top": `${anchorRect.top + anchorRect.height / 2}px`,
-			} as CSSProperties}>
+			style={
+				{
+					"--tooltip-left": `${anchorRect.right + 8}px`,
+					"--tooltip-top": `${anchorRect.top + anchorRect.height / 2}px`,
+				} as CSSProperties
+			}>
 			{label}
 		</div>
 	);
@@ -48,12 +50,21 @@ function useSidebarTooltip(isCollapsed: boolean) {
 	return { tooltip, showTooltip, hideTooltip };
 }
 
-const NAV_ITEMS = [
+type NavItem =
+	| { href: string; label: string; icon: string }
+	| { href: string; label: string; icon: string; external: true };
+
+const NAV_ITEMS: NavItem[] = [
 	{ href: "/vsComputer", label: "VS CPU", icon: ">" },
 	{ href: "/vsPlayer", label: "VS PLAYER", icon: "+" },
 	{ href: "/liveMatch", label: "LIVE", icon: "#" },
 	{ href: "/downloads", label: "DOWNLOADS", icon: "=" },
-	{ href: "/bugs", label: "BUG REPORT", icon: "!" },
+	{
+		href: "https://github.com/notakto/notakto-website/issues",
+		label: "BUG REPORT",
+		icon: "!",
+		external: true,
+	},
 ];
 
 type ModalAction = "tutorial" | "soundConfig" | "shortcut" | "profile";
@@ -97,6 +108,58 @@ const GAME_BUTTONS: Record<string, GameButton[]> = {
 		{ label: "EXIT TO MENU", icon: "X", modal: "exitConfirmation" },
 	],
 };
+
+function NavLink({
+	item,
+	isActive,
+	isCollapsed,
+	showTooltip,
+	hideTooltip,
+}: {
+	item: NavItem;
+	isActive: boolean;
+	isCollapsed: boolean;
+	showTooltip: (e: React.MouseEvent, label: string) => void;
+	hideTooltip: () => void;
+}) {
+	const cls = `flex items-center gap-3 px-4 py-3 font-pixel text-[8px] uppercase tracking-wider transition-colors duration-100 ${
+		isActive
+			? "bg-bg3 text-accent border-l-3 border-accent"
+			: "text-cream-dim hover:text-cream hover:bg-bg2 border-l-3 border-transparent"
+	}`;
+	const content = (
+		<>
+			<span className="text-[10px] w-4 text-center shrink-0">{item.icon}</span>
+			{!isCollapsed && <span>{item.label}</span>}
+		</>
+	);
+
+	if ("external" in item && item.external) {
+		return (
+			<a
+				key={item.href}
+				href={item.href}
+				target="_blank"
+				rel="noopener noreferrer"
+				onMouseEnter={(e) => showTooltip(e, item.label)}
+				onMouseLeave={hideTooltip}
+				className={cls}>
+				{content}
+			</a>
+		);
+	}
+
+	return (
+		<Link
+			key={item.href}
+			href={item.href}
+			onMouseEnter={(e) => showTooltip(e, item.label)}
+			onMouseLeave={hideTooltip}
+			className={cls}>
+			{content}
+		</Link>
+	);
+}
 
 export default function Sidebar() {
 	const { isCollapsed, toggle, setCollapsed } = useSidebar();
@@ -144,26 +207,16 @@ export default function Sidebar() {
 								Play
 							</div>
 						)}
-						{NAV_ITEMS.slice(0, 3).map((item) => {
-							const isActive = pathname === item.href;
-							return (
-								<Link
-									key={item.href}
-									href={item.href}
-									onMouseEnter={(e) => showTooltip(e, item.label)}
-									onMouseLeave={hideTooltip}
-									className={`flex items-center gap-3 px-4 py-3 font-pixel text-[8px] uppercase tracking-wider transition-colors duration-100 ${
-										isActive
-											? "bg-bg3 text-accent border-l-3 border-accent"
-											: "text-cream-dim hover:text-cream hover:bg-bg2 border-l-3 border-transparent"
-									}`}>
-									<span className="text-[10px] w-4 text-center shrink-0">
-										{item.icon}
-									</span>
-									{!isCollapsed && <span>{item.label}</span>}
-								</Link>
-							);
-						})}
+						{NAV_ITEMS.slice(0, 3).map((item) => (
+							<NavLink
+								key={item.href}
+								item={item}
+								isActive={pathname === item.href}
+								isCollapsed={isCollapsed}
+								showTooltip={showTooltip}
+								hideTooltip={hideTooltip}
+							/>
+						))}
 					</div>
 
 					{/* Game actions (only on game pages) */}
@@ -178,6 +231,7 @@ export default function Sidebar() {
 								)}
 								{GAME_BUTTONS[pathname].map((item) => (
 									<button
+										type="button"
 										key={item.modal}
 										onClick={() => openModal(item.modal)}
 										onMouseEnter={(e) => showTooltip(e, item.label)}
@@ -205,6 +259,7 @@ export default function Sidebar() {
 						)}
 						{MODAL_ITEMS.map((item) => (
 							<button
+								type="button"
 								key={item.modal}
 								onClick={() => openModal(item.modal)}
 								onMouseEnter={(e) => showTooltip(e, item.label)}
@@ -228,35 +283,24 @@ export default function Sidebar() {
 								More
 							</div>
 						)}
-						{NAV_ITEMS.slice(3).map((item) => {
-							const isActive = pathname === item.href;
-							return (
-								<Link
-									key={item.href}
-									href={item.href}
-									onMouseEnter={(e) => showTooltip(e, item.label)}
-									onMouseLeave={hideTooltip}
-									className={`flex items-center gap-3 px-4 py-3 font-pixel text-[8px] uppercase tracking-wider transition-colors duration-100 ${
-										isActive
-											? "bg-bg3 text-accent border-l-3 border-accent"
-											: "text-cream-dim hover:text-cream hover:bg-bg2 border-l-3 border-transparent"
-									}`}>
-									<span className="text-[10px] w-4 text-center shrink-0">
-										{item.icon}
-									</span>
-									{!isCollapsed && <span>{item.label}</span>}
-								</Link>
-							);
-						})}
+						{NAV_ITEMS.slice(3).map((item) => (
+							<NavLink
+								key={item.href}
+								item={item}
+								isActive={pathname === item.href}
+								isCollapsed={isCollapsed}
+								showTooltip={showTooltip}
+								hideTooltip={hideTooltip}
+							/>
+						))}
 					</div>
 				</div>
 
 				{/* Sign in/out */}
 				<button
+					type="button"
 					onClick={handleAuth}
-					onMouseEnter={(e) =>
-						showTooltip(e, user ? "SIGN OUT" : "SIGN IN")
-					}
+					onMouseEnter={(e) => showTooltip(e, user ? "SIGN OUT" : "SIGN IN")}
 					onMouseLeave={hideTooltip}
 					className={`px-4 py-3 border-t-3 border-border-pixel font-pixel text-[8px] cursor-pointer transition-colors flex items-center gap-3 uppercase tracking-wider ${
 						user
@@ -266,13 +310,12 @@ export default function Sidebar() {
 					<span className="text-[10px] w-4 text-center shrink-0">
 						{user ? "<" : ">"}
 					</span>
-					{!isCollapsed && (
-						<span>{user ? "SIGN OUT" : "SIGN IN"}</span>
-					)}
+					{!isCollapsed && <span>{user ? "SIGN OUT" : "SIGN IN"}</span>}
 				</button>
 
 				{/* Collapse toggle */}
 				<button
+					type="button"
 					onClick={toggle}
 					onMouseEnter={(e) =>
 						showTooltip(e, isCollapsed ? "EXPAND" : "COLLAPSE")
