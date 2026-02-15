@@ -12,8 +12,9 @@ import LiveContainer from "@/components/ui/Containers/Games/Live/LiveContainer";
 import SearchContainer from "@/components/ui/Containers/Games/Live/SearchContainer";
 import Spinner from "@/components/ui/Feedback/Spinner";
 import GameLayout from "@/components/ui/Layout/GameLayout";
-import PlayerTurnTitle from "@/components/ui/Title/PlayerTurnTitle";
+import GameTopBar, { GameStatusBar } from "@/components/ui/Game/GameTopBar";
 import SearchLabel from "@/components/ui/Title/SearchLabel";
+import { useUser } from "@/services/store";
 import { TOAST_DURATION, TOAST_IDS } from "@/constants/toast";
 
 const SERVER_URL = "https://notakto-websocket.onrender.com";
@@ -22,6 +23,18 @@ const socket = io(SERVER_URL);
 const LiveMode = () => {
 	const router = useRouter();
 	const { resetCooldown } = useToastCooldown(TOAST_DURATION);
+	const user = useUser((s) => s.user);
+	const authReady = useUser((s) => s.authReady);
+
+	// Redirect to menu if not authenticated
+	useEffect(() => {
+		if (!authReady) return;
+		if (!user) {
+			toast.error("Sign in to play live matches");
+			router.push("/");
+		}
+	}, [authReady, user, router]);
+
 	const onClose = () => {
 		router.push("/");
 	};
@@ -97,14 +110,30 @@ const LiveMode = () => {
 		socket.emit("joinGame");
 	};
 
+	// Convert live boards to BoardState[] for GameTopBar
+	const boardStates = boards.map((b) => b.grid as string[]);
+
 	return (
 		<GameLayout>
 			<LiveContainer>
 				{gameState === "playing" ? (
 					<>
-						<PlayerTurnTitle
-							variant={"live"}
-							text={isMyTurn ? "Your Turn" : "Opponent's Turn"}
+						<GameTopBar
+							player1={{ name: "You", moveCount: 0 }}
+							player2={{ name: "Opponent", moveCount: 0 }}
+							currentPlayer={isMyTurn ? 1 : 2}
+							boards={boardStates}
+							boardSize={3}
+							gameOver={false}
+							mode="liveMatch"
+						/>
+						<GameStatusBar
+							currentPlayer={isMyTurn ? 1 : 2}
+							moveCount={0}
+							gameOver={false}
+							mode="liveMatch"
+							player1Name="You"
+							player2Name="Opponent"
 						/>
 						<BoardGridContainer>
 							{boards.map((board, boardIndex) => {
@@ -113,7 +142,7 @@ const LiveMode = () => {
 									<BoardLiveContainer key={boardKey} blocked={board.blocked}>
 										{board.grid.map((cell, cellIndex) => (
 											<BoardCell
-												key={`cell-${cellIndex}-${cell}`} //FIXME: better key
+												key={`cell-${cellIndex}-${cell}`}
 												value={cell}
 												onClick={() => handleMove(boardIndex, cellIndex)}
 												disabled={!isMyTurn || board.blocked || cell !== ""}

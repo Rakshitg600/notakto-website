@@ -12,8 +12,8 @@ export default function CellButton({
 			onClick={onClick}
 			disabled={disabled}
 			className={clsx(
-				"relative border border-gray-300 flex items-center justify-center aspect-square",
-				disabled ? "bg-gray-800" : "bg-black hover:bg-gray-900",
+				"relative border border-bg3 flex items-center justify-center aspect-square",
+				disabled ? "bg-dead" : "bg-board-bg hover:bg-bg1 cursor-pointer",
 			)}>
 			{children}
 		</button>

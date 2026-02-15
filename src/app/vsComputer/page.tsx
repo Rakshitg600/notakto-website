@@ -5,24 +5,14 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { useShortcut } from "@/components/hooks/useShortcut";
 import Board from "@/components/ui/Board/Board";
-import SettingBar from "@/components/ui/Buttons/SettingBar";
-import { SettingButton } from "@/components/ui/Buttons/SettingButton";
-import BoardContainer from "@/components/ui/Containers/Board/BoardContainer";
-import BoardWrapper from "@/components/ui/Containers/Board/BoardWrapper";
-import GameBoardArea from "@/components/ui/Containers/Games/GameBoardArea";
-import PlayerStatusContainer from "@/components/ui/Containers/Games/PlayerStatusContainer";
-import StatContainer from "@/components/ui/Containers/Games/StatContainer";
-import SettingContainer from "@/components/ui/Containers/Settings/SettingContainer";
-import SettingOverlay from "@/components/ui/Containers/Settings/SettingOverlay";
 import GameLayout from "@/components/ui/Layout/GameLayout";
-import PlayerTurnTitle from "@/components/ui/Title/PlayerTurnTitle";
-import StatLabel from "@/components/ui/Title/StatLabel";
+import GameTopBar, { GameStatusBar } from "@/components/ui/Game/GameTopBar";
+import GameStatsPanel from "@/components/ui/Game/GameStatsPanel";
+import GameActionBar from "@/components/ui/Game/GameActionBar";
+import type { MoveLogEntry } from "@/components/ui/Game/GameTopBar";
 import BoardConfigModal from "@/modals/BoardConfigModal";
 import ConfirmationModal from "@/modals/ConfirmationModal";
 import DifficultyModal from "@/modals/DifficultyModal";
-import ProfileModal from "@/modals/ProfileModal";
-import ShortcutModal from "@/modals/ShortcutModal";
-import SoundConfigModal from "@/modals/SoundConfigModal";
 import WinnerModal from "@/modals/WinnerModal";
 import {
 	createGame,
@@ -40,18 +30,28 @@ import type {
 } from "@/services/schema";
 import { playMoveSound, playWinSound } from "@/services/sounds";
 import { useCoins, useSound, useUser, useXP } from "@/services/store";
+import { useGlobalModal } from "@/services/globalModal";
 import type {
 	BoardNumber,
 	BoardSize,
 	BoardState,
-	ComputerButtonModalType,
 	DifficultyLevel,
 	ErrorResponse,
 	NewGameResponse,
 } from "@/services/types";
 
+/** Count total X marks across all boards */
+function countTotalMoves(boards: BoardState[]): number {
+	let count = 0;
+	for (const board of boards) {
+		for (const cell of board) {
+			if (cell === "X") count++;
+		}
+	}
+	return count;
+}
+
 const Game = () => {
-	const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 	const [boards, setBoards] = useState<BoardState[]>([]);
 	const [boardSize, setBoardSize] = useState<BoardSize>(3);
 	const [, setGameHistory] = useState<BoardState[][]>([]);
@@ -71,8 +71,13 @@ const Game = () => {
 	const [isUpdatingConfig, setIsUpdatingConfig] = useState<boolean>(false);
 	const [isUpdatingDifficulty, setIsUpdatingDifficulty] =
 		useState<boolean>(false);
-	const [activeModal, setActiveModal] = useState<ComputerButtonModalType>(null);
 	const [hasMoveHappened, setHasMoveHappened] = useState(false);
+	const [selectedBoard, setSelectedBoard] = useState(0);
+	const [moveLog, setMoveLog] = useState<MoveLogEntry[]>([]);
+	const startTimeRef = useRef<number>(Date.now());
+	const [elapsed, setElapsed] = useState(0);
+
+	const { activeModal, openModal, closeModal } = useGlobalModal();
 
 	const { sfxMute } = useSound();
 	const Coins = useCoins((state) => state.coins);
@@ -80,62 +85,78 @@ const Game = () => {
 	const setXP = useXP((state) => state.setXP);
 	const XP = useXP((state) => state.XP);
 	const user = useUser((state) => state.user);
-	const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-	// const { canShowToast, resetCooldown } = useToastCooldown(TOAST_DURATION);
 	const router = useRouter();
+
+	// Elapsed time tracker
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000));
+		}, 1000);
+		return () => clearInterval(interval);
+	}, []);
+
+	const formatTime = (seconds: number) => {
+		const m = Math.floor(seconds / 60);
+		const s = seconds % 60;
+		return `${m}:${s.toString().padStart(2, "0")}`;
+	};
 
 	useShortcut(
 		{
 			escape: () => {
 				if (activeModal === "winner") return;
-
-				if (activeModal) return setActiveModal(null);
-				return setIsMenuOpen(false);
+				if (activeModal) return closeModal();
 			},
 
 			m: () => {
 				if (activeModal === "winner") return;
-				setActiveModal((prev) =>
-					prev === "exitConfirmation" ? null : "exitConfirmation",
-				);
+				activeModal === "exitConfirmation"
+					? closeModal()
+					: openModal("exitConfirmation");
 			},
 
 			r: () => {
 				if (activeModal === "winner" || !hasMoveHappened) return;
-				setActiveModal((prev) =>
-					prev === "resetConfirmation" ? null : "resetConfirmation",
-				);
+				activeModal === "resetConfirmation"
+					? closeModal()
+					: openModal("resetConfirmation");
 			},
 
 			c: () => {
 				if (activeModal === "winner") return;
-				setActiveModal((prev) =>
-					prev === "boardConfig" ? null : "boardConfig",
-				);
+				activeModal === "boardConfig"
+					? closeModal()
+					: openModal("boardConfig");
 			},
 
 			s: () => {
 				if (activeModal === "winner") return;
-				setActiveModal((prev) =>
-					prev === "soundConfig" ? null : "soundConfig",
-				);
+				activeModal === "soundConfig"
+					? closeModal()
+					: openModal("soundConfig");
 			},
 
 			d: () => {
 				if (activeModal === "winner") return;
-				setActiveModal((prev) => (prev === "difficulty" ? null : "difficulty"));
+				activeModal === "difficulty"
+					? closeModal()
+					: openModal("difficulty");
 			},
 
 			q: () => {
 				if (activeModal === "winner") return;
-				setActiveModal((prev) => (prev === "shortcut" ? null : "shortcut"));
+				activeModal === "shortcut"
+					? closeModal()
+					: openModal("shortcut");
 			},
 			p: () => {
 				if (activeModal === "winner") return;
-				setActiveModal((prev) => (prev === "profile" ? null : "profile"));
+				activeModal === "profile"
+					? closeModal()
+					: openModal("profile");
 			},
 		},
-		isMenuOpen,
+		false,
 	);
 
 	const initGame = async (
@@ -146,7 +167,6 @@ const Game = () => {
 		try {
 			if (user) {
 				const data = await createGame(num, size, diff, await user.getIdToken());
-				// handle API-level errors (ErrorResponse)
 				if (!data || (data as ErrorResponse).success === false) {
 					const err = (data as ErrorResponse) ?? {
 						success: false,
@@ -156,7 +176,6 @@ const Game = () => {
 					return;
 				}
 
-				// At this point `data` is NewGameResponse
 				const resp = data as NewGameResponse;
 				let newBoards: BoardState[];
 				try {
@@ -181,6 +200,14 @@ const Game = () => {
 				setNumberOfBoards(resp.numberOfBoards);
 				setDifficulty(resp.difficulty);
 				setGameHistory([newBoards]);
+				setMoveLog([]);
+				setSelectedBoard(0);
+				startTimeRef.current = Date.now();
+				setElapsed(0);
+
+				// If loading an existing game, check if moves already exist
+				const existingMoves = countTotalMoves(newBoards);
+				setHasMoveHappened(existingMoves > 0);
 			} else {
 				console.log("initGame: user not authenticated");
 				toast.error("User not authenticated");
@@ -236,6 +263,51 @@ const Game = () => {
 					toast.error("Failed to initialize game boards");
 					return;
 				}
+
+				// Detect CPU's move by comparing boards after player's move with API result
+				const afterPlayer = boards.map((board, idx) =>
+					idx === boardIndex
+						? [
+								...board.slice(0, cellIndex),
+								"X",
+								...board.slice(cellIndex + 1),
+							]
+						: [...board],
+				);
+				let cpuBoard = -1;
+				let cpuCell = -1;
+				for (let b = 0; b < newBoards.length; b++) {
+					for (let c = 0; c < newBoards[b].length; c++) {
+						if (newBoards[b][c] !== afterPlayer[b][c]) {
+							cpuBoard = b;
+							cpuCell = c;
+							break;
+						}
+					}
+					if (cpuBoard >= 0) break;
+				}
+
+				// Log player move + CPU move
+				setMoveLog((prev) => {
+					const updated = [
+						...prev,
+						{ player: 1 as const, board: boardIndex, cell: cellIndex },
+					];
+					if (cpuBoard >= 0) {
+						updated.push({
+							player: 2 as const,
+							board: cpuBoard,
+							cell: cpuCell,
+						});
+					}
+					return updated;
+				});
+
+				// Auto-switch to the board the CPU moved on
+				if (cpuBoard >= 0) {
+					setSelectedBoard(cpuBoard);
+				}
+
 				setBoards(newBoards);
 				setCurrentPlayer(1);
 				setGameHistory((prev) => [...prev, newBoards]);
@@ -252,7 +324,7 @@ const Game = () => {
 					} else {
 						setWinner("Computer");
 					}
-					setActiveModal("winner");
+					openModal("winner");
 					playWinSound(sfxMute);
 				} else {
 					playMoveSound(sfxMute);
@@ -352,6 +424,13 @@ const Game = () => {
 				setBoards(newBoards);
 				setCurrentPlayer(1);
 				setGameHistory((prev) => [...prev, newBoards]);
+				// Remove last two moves (player + CPU) from log
+				setMoveLog((prev) => prev.slice(0, Math.max(0, prev.length - 2)));
+
+				// Re-check hasMoveHappened from actual board state after undo
+				const remainingMoves = countTotalMoves(newBoards);
+				setHasMoveHappened(remainingMoves > 0);
+
 				const token = await user.getIdToken();
 				const wallet = await getWallet(token);
 
@@ -430,7 +509,7 @@ const Game = () => {
 					} else {
 						setWinner("Computer");
 					}
-					setActiveModal("winner");
+					openModal("winner");
 					playWinSound(sfxMute);
 				} else {
 					playMoveSound(sfxMute);
@@ -551,141 +630,145 @@ const Game = () => {
 		};
 	}, [authReady, user]);
 
+	const playerMoveCount = moveLog.filter((m) => m.player === 1).length;
+	const cpuMoveCount = moveLog.filter((m) => m.player === 2).length;
+	const totalMoves = countTotalMoves(boards);
+	const aliveCount = boards.filter(
+		(b) => !isBoardDead(b, boardSize),
+	).length;
+
 	return (
 		<GameLayout>
-			<GameBoardArea>
-				<PlayerStatusContainer>
-					<StatContainer>
-						<StatLabel text={`Coins: ${Coins}`} />
-						<StatLabel text={`| XP: ${XP}`} />
-					</StatContainer>
-					<PlayerTurnTitle
-						text={currentPlayer === 1 ? "Your Turn" : "Computer's Turn"}
+			<GameTopBar
+				player1={{
+					name: "You",
+					moveCount: playerMoveCount,
+				}}
+				player2={{
+					name: "CPU",
+					moveCount: cpuMoveCount,
+				}}
+				currentPlayer={currentPlayer as 1 | 2}
+				boards={boards}
+				boardSize={boardSize}
+				gameOver={activeModal === "winner"}
+				mode="vsComputer"
+			/>
+
+			{/* 3-column content: left (coins/xp + board selector) | center (turn + board) | right (stats + log) */}
+			<div className="flex-1 flex gap-4 px-4 min-h-0 overflow-hidden">
+				{/* Left column: Coins/XP + board selector */}
+				<div className="hidden lg:flex w-64 shrink-0 flex-col pt-3">
+					<div className="pixel-border bg-bg2 px-4 py-2.5 flex items-center gap-3 self-start shrink-0">
+						<span className="font-pixel text-[10px] text-accent">
+							{Coins} COINS
+						</span>
+						<span className="font-pixel text-[7px] text-border-pixel">|</span>
+						<span className="font-pixel text-[10px] text-accent">
+							{XP} XP
+						</span>
+					</div>
+
+					{/* Board selector — vertically centered in remaining space */}
+					{boards.length > 1 && (
+						<div className="flex-1 flex flex-col items-end justify-center gap-2.5">
+							{boards.map((board, i) => {
+								const dead = isBoardDead(board, boardSize);
+								const selected = i === selectedBoard;
+								return (
+									<button
+										key={`tab-${i}`}
+										type="button"
+										onClick={() => setSelectedBoard(i)}
+										className={`relative font-pixel text-[10px] px-5 py-3 flex items-center justify-center border-2 cursor-pointer transition-all whitespace-nowrap ${
+											selected
+												? "bg-bg3 border-accent text-cream shadow-[2px_2px_0_var(--color-accent)]"
+												: dead
+													? "bg-bg2 border-border-pixel text-muted"
+													: "bg-bg2 border-border-pixel text-cream-dim hover:text-cream hover:border-accent/50"
+										}`}>
+										BOARD {i + 1}
+										<span
+											className={`absolute -top-1.5 -right-1.5 w-3.5 h-3.5 border border-bg0 ${
+												dead ? "bg-dead" : "bg-success"
+											}`}
+										/>
+									</button>
+								);
+							})}
+						</div>
+					)}
+				</div>
+
+				{/* Center column: turn info + board (both centered on same axis) */}
+				<div className="flex-1 flex flex-col items-center min-h-0">
+					<GameStatusBar
+						currentPlayer={currentPlayer as 1 | 2}
+						moveCount={totalMoves}
+						gameOver={activeModal === "winner"}
+						mode="vsComputer"
+						player1Name="You"
+						player2Name="CPU"
 					/>
-				</PlayerStatusContainer>
 
-				<BoardContainer>
-					{boards.map((board, index) => (
-						//FIXME:
-						// biome-ignore lint/suspicious/noArrayIndexKey: <fix later>
-						<BoardWrapper key={index}>
-							<Board
-								boardIndex={index}
-								boardState={board}
-								makeMove={handleMove}
-								isDead={isBoardDead(board, boardSize)}
-								boardSize={boardSize}
-							/>
-						</BoardWrapper>
-					))}
-				</BoardContainer>
-				<SettingBar text={"Settings"} onClick={toggleMenu} />
-			</GameBoardArea>
+					{boards.length > 0 && boards[selectedBoard] && (
+						<div className="flex-1 flex items-center justify-center w-full p-4">
+							<div className="max-w-[520px] w-full">
+								<Board
+									boardIndex={selectedBoard}
+									boardState={boards[selectedBoard]}
+									makeMove={handleMove}
+									isDead={isBoardDead(boards[selectedBoard], boardSize)}
+									boardSize={boardSize}
+								/>
+							</div>
+						</div>
+					)}
+				</div>
 
-			{isMenuOpen && (
-				<SettingOverlay>
-					<SettingContainer>
-						<SettingButton
-							onClick={() => {
-								handleReset();
-								setIsMenuOpen(false);
-							}}
-							disabled={isResetting}
-							loading={isResetting}>
-							Reset
-						</SettingButton>
-						<SettingButton
-							onClick={() => {
-								setActiveModal("boardConfig");
-								setIsMenuOpen(false);
-							}}
-							disabled={isUpdatingConfig}
-							loading={isUpdatingConfig}>
-							Game Configuration
-						</SettingButton>
-						<SettingButton
-							onClick={() => {
-								handleUndo();
-								setIsMenuOpen(false);
-							}}
-							disabled={Coins < 100 || isUndoing}
-							loading={isUndoing}>
-							Undo (100 coins)
-						</SettingButton>
-						<SettingButton
-							onClick={() => {
-								handleSkip();
-								setIsMenuOpen(false);
-							}}
-							disabled={Coins < 200 || isSkipping}
-							loading={isSkipping}>
-							Skip a Move (200 coins)
-						</SettingButton>
-						<SettingButton
-							//Blocking the current functions since we need it disabled until the feature comes up right
-							// DO NOT DELETE THIS COMMENTS
+				{/* Right column: match stats + move log */}
+				<GameStatsPanel
+					stats={[
+						{ label: "TOTAL MOVES", value: totalMoves },
+						{ label: "BOARDS ALIVE", value: aliveCount },
+						{ label: "TIME", value: formatTime(elapsed) },
+					]}
+					moveLog={moveLog}
+					boardSize={boardSize}
+				/>
+			</div>
 
-							// onClick={() =>
-							// 	handleBuyCoins(
-							// 		setIsProcessingPayment,
-							// 		canShowToast,
-							// 		resetCooldown,
-							// 		setCoins,
-							// 		Coins,
-							// 	)
-							// }
-							// disabled={isProcessingPayment}
+			{/* Sticky action bar */}
+			<GameActionBar
+				actions={[
+					{
+						label: `UNDO (${100})`,
+						onClick: handleUndo,
+						disabled: Coins < 100 || isUndoing || !hasMoveHappened,
+					},
+					{
+						label: `SKIP (${200})`,
+						onClick: handleSkip,
+						disabled: Coins < 200 || isSkipping,
+					},
+					{
+						label: "RESIGN",
+						onClick: () => openModal("exitConfirmation"),
+						variant: "danger",
+					},
+				]}
+			/>
 
-							disabled={true} // make it gray + non-clickable
-							title="Currently not available" // native tooltip
-							loading={isProcessingPayment}>
-							Buy Coins (100)
-						</SettingButton>
-						<SettingButton
-							onClick={() => {
-								setActiveModal("difficulty");
-								setIsMenuOpen(false);
-							}}>
-							AI Level: {difficulty}
-						</SettingButton>
-						<SettingButton
-							onClick={() => {
-								setActiveModal("soundConfig");
-								setIsMenuOpen(false);
-							}}>
-							Adjust Sound
-						</SettingButton>
-						<SettingButton
-							onClick={() => {
-								setActiveModal("profile");
-								setIsMenuOpen(false);
-							}}>
-							Profile
-						</SettingButton>
-						<SettingButton onClick={() => router.push("/")}>
-							Main Menu
-						</SettingButton>
-						<SettingButton onClick={toggleMenu}>Return to Game</SettingButton>
-						<SettingButton
-							onClick={() => {
-								setActiveModal("shortcut");
-								setIsMenuOpen(false);
-							}}>
-							Keyboard Shortcuts
-						</SettingButton>
-					</SettingContainer>
-				</SettingOverlay>
-			)}
-
+			{/* Modals — game-specific only (soundConfig/shortcut/profile handled by GlobalModals) */}
 			<WinnerModal
 				visible={activeModal === "winner"}
 				winner={winner}
 				onPlayAgain={() => {
-					setActiveModal(null);
+					closeModal();
 					handleReset();
 				}}
 				onMenu={() => {
-					setActiveModal(null);
+					closeModal();
 					router.push("/");
 				}}
 			/>
@@ -696,29 +779,17 @@ const Game = () => {
 				currentSize={boardSize}
 				onConfirm={(boards, size) => {
 					handleBoardConfigChange(boards, size);
-					setActiveModal(null);
+					closeModal();
 				}}
-				onCancel={() => setActiveModal(null)}
-			/>
-			<ShortcutModal
-				visible={activeModal === "shortcut"}
-				onClose={() => setActiveModal(null)}
+				onCancel={closeModal}
 			/>
 			<DifficultyModal
 				visible={activeModal === "difficulty"}
 				onSelect={(level: DifficultyLevel) => {
 					handleDifficultyChange(level);
-					setActiveModal(null);
+					closeModal();
 				}}
-				onClose={() => setActiveModal(null)}
-			/>
-			<SoundConfigModal
-				visible={activeModal === "soundConfig"}
-				onClose={() => setActiveModal(null)}
-			/>
-			<ProfileModal
-				visible={activeModal === "profile"}
-				onClose={() => setActiveModal(null)}
+				onClose={closeModal}
 			/>
 			<ConfirmationModal
 				visible={activeModal === "resetConfirmation"}
@@ -726,9 +797,9 @@ const Game = () => {
 				message="Are you sure you want to reset the current game?"
 				onConfirm={() => {
 					handleReset();
-					setActiveModal(null);
+					closeModal();
 				}}
-				onCancel={() => setActiveModal(null)}
+				onCancel={closeModal}
 				confirmText="Yes, Reset"
 			/>
 			<ConfirmationModal
@@ -738,7 +809,7 @@ const Game = () => {
 				onConfirm={() => {
 					router.push("/");
 				}}
-				onCancel={() => setActiveModal(null)}
+				onCancel={closeModal}
 				confirmText="Yes, Exit"
 			/>
 		</GameLayout>

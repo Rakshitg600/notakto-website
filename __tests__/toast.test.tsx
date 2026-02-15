@@ -1,11 +1,6 @@
 import { act, render, screen } from "@testing-library/react";
 import { toast } from "react-toastify";
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-// Mock font for next/font/google
-vi.mock("next/font/google", () => ({
-	VT323: (_opts: unknown) => ({ className: "vt323-class" }),
-}));
+import { afterEach, describe, expect, it } from "vitest";
 
 import { CustomToastContainer } from "@/components/ui/Toasts/CustomToastContainer";
 
@@ -31,9 +26,8 @@ describe("Toast Tests", () => {
 		expect(toastWrapper).toBeTruthy();
 
 		const expected = [
-			"vt323-class",
-			"bg-black",
-			"text-white",
+			"bg-panel",
+			"text-cream",
 			"relative",
 			"text-center",
 		];

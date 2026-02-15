@@ -356,27 +356,6 @@ export type ShortcutMap = Record<string, ShortcutHandler>;
 
 // MODAL TYPE UNIONS
 
-export type PlayerButtonModalType =
-	| "names"
-	| "winner"
-	| "boardConfig"
-	| "soundConfig"
-	| "shortcut"
-	| "resetConfirmation"
-	| "exitConfirmation"
-	| null;
-
-export type ComputerButtonModalType =
-	| "winner"
-	| "boardConfig"
-	| "soundConfig"
-	| "difficulty"
-	| "shortcut"
-	| "resetConfirmation"
-	| "exitConfirmation"
-	| "profile"
-	| null;
-
 export type MenuModalType =
 	| "soundConfig"
 	| "shortcut"
