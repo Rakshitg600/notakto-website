@@ -1,10 +1,10 @@
 "use client";
 
-import { useGlobalModal } from "@/services/globalModal";
 import ProfileModal from "@/modals/ProfileModal";
 import ShortcutModal from "@/modals/ShortcutModal";
 import SoundConfigModal from "@/modals/SoundConfigModal";
 import TutorialModal from "@/modals/TutorialModal";
+import { useGlobalModal } from "@/services/globalModal";
 
 export default function GlobalModals() {
 	const { activeModal, closeModal } = useGlobalModal();
@@ -23,10 +23,7 @@ export default function GlobalModals() {
 				visible={activeModal === "tutorial"}
 				onClose={closeModal}
 			/>
-			<ProfileModal
-				visible={activeModal === "profile"}
-				onClose={closeModal}
-			/>
+			<ProfileModal visible={activeModal === "profile"} onClose={closeModal} />
 		</>
 	);
 }

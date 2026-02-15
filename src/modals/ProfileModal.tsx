@@ -40,20 +40,16 @@ const ProfileModal = ({ visible, onClose }: ProfileModalProps) => {
 
 						<div className="space-y-2 my-4">
 							<div className="font-pixel text-[8px] text-cream-dim text-center">
-								NAME:{" "}
-								<span className="text-cream">{name}</span>
+								NAME: <span className="text-cream">{name}</span>
 							</div>
 							<div className="font-pixel text-[8px] text-cream-dim text-center">
-								EMAIL:{" "}
-								<span className="text-cream">{email}</span>
+								EMAIL: <span className="text-cream">{email}</span>
 							</div>
 							<div className="font-pixel text-[8px] text-cream-dim text-center">
-								COINS:{" "}
-								<span className="text-accent">{coins}</span>
+								COINS: <span className="text-accent">{coins}</span>
 							</div>
 							<div className="font-pixel text-[8px] text-cream-dim text-center">
-								XP:{" "}
-								<span className="text-accent">{xp}</span>
+								XP: <span className="text-accent">{xp}</span>
 							</div>
 						</div>
 					</>

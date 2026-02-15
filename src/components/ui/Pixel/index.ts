@@ -1,8 +1,8 @@
-export { default as PixelBorder } from "./PixelBorder";
-export { default as PixelButton } from "./PixelButton";
-export { default as Heading } from "./Heading";
-export { default as SubText } from "./SubText";
-export { default as Divider } from "./Divider";
-export { default as Badge } from "./Badge";
-export { default as PixelInput } from "./PixelInput";
-export { default as ProgressBar } from "./ProgressBar";
+export { default as Badge } from "@/components/ui/Pixel/Badge";
+export { default as Divider } from "@/components/ui/Pixel/Divider";
+export { default as Heading } from "@/components/ui/Pixel/Heading";
+export { default as PixelBorder } from "@/components/ui/Pixel/PixelBorder";
+export { default as PixelButton } from "@/components/ui/Pixel/PixelButton";
+export { default as PixelInput } from "@/components/ui/Pixel/PixelInput";
+export { default as ProgressBar } from "@/components/ui/Pixel/ProgressBar";
+export { default as SubText } from "@/components/ui/Pixel/SubText";

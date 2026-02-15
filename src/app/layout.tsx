@@ -5,11 +5,11 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Press_Start_2P } from "next/font/google";
 import ClientSideInit from "@/app/ClientSideInit";
 import MusicProvider from "@/components/MusicProvider";
-import { CustomToastContainer } from "@/components/ui/Toasts/CustomToastContainer";
+import GlobalModals from "@/components/ui/GlobalModals";
 import Sidebar from "@/components/ui/Sidebar/Sidebar";
 import SidebarMargin from "@/components/ui/Sidebar/SidebarMargin";
 import SplashScreen from "@/components/ui/Splash/SplashScreen";
-import GlobalModals from "@/components/ui/GlobalModals";
+import { CustomToastContainer } from "@/components/ui/Toasts/CustomToastContainer";
 
 export const metadata: Metadata = {
 	title: "Menu | Notakto",

@@ -66,14 +66,13 @@ const Menu = () => {
 			<div className="grid gap-6 w-full max-w-2xl">
 				{GAME_MODES.map((g) => (
 					<button
+						type="button"
 						key={g.mode}
 						onClick={() => startGame(g.mode, g.requiresAuth)}
 						className="group bg-panel pixel-border p-6 text-left cursor-pointer hover:bg-bg2 transition-colors duration-150 flex items-center gap-6">
 						{/* Icon */}
 						<div className="w-14 h-14 bg-bg0 border-3 border-border-pixel flex items-center justify-center shrink-0 group-hover:border-accent transition-colors">
-							<span className="font-pixel text-xl text-accent">
-								{g.icon}
-							</span>
+							<span className="font-pixel text-xl text-accent">{g.icon}</span>
 						</div>
 
 						{/* Text */}

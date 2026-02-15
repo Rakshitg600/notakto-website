@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSplash } from "@/services/splash";
 
 export default function SplashScreen() {
@@ -66,6 +66,7 @@ export default function SplashScreen() {
 			{phase >= 3 && (
 				<div className="text-center animate-slide-up">
 					<button
+						type="button"
 						onClick={dismiss}
 						className="font-pixel text-[10px] text-bg0 bg-accent border-3 border-border-light px-8 py-3 cursor-pointer hover:bg-accent-dim shadow-[3px_3px_0_var(--color-bg0)] transition-all duration-100 uppercase tracking-wider mb-4">
 						INSERT COIN

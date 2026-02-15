@@ -25,12 +25,7 @@ describe("Toast Tests", () => {
 			toastText.closest(".Toastify__toast") ?? toastText.closest("div");
 		expect(toastWrapper).toBeTruthy();
 
-		const expected = [
-			"bg-panel",
-			"text-cream",
-			"relative",
-			"text-center",
-		];
+		const expected = ["bg-panel", "text-cream", "relative", "text-center"];
 		for (const cls of expected) expect(toastWrapper?.className).toContain(cls);
 
 		expect(screen.queryAllByText("Hello Toast Test")).toHaveLength(1);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { MoveLogEntry } from "./GameTopBar";
+import type { MoveLogEntry } from "@/components/ui/Game/GameTopBar";
 
 interface StatItem {
 	label: string;
@@ -21,6 +21,7 @@ export default function GameStatsPanel({
 }: GameStatsPanelProps) {
 	const logEndRef = useRef<HTMLDivElement>(null);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: scroll when new moves are added
 	useEffect(() => {
 		logEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [moveLog.length]);
@@ -35,9 +36,7 @@ export default function GameStatsPanel({
 				<div className="grid grid-cols-2 gap-3">
 					{stats.map((s) => (
 						<div key={s.label} className="py-1">
-							<div className="font-pixel text-[14px] text-cream">
-								{s.value}
-							</div>
+							<div className="font-pixel text-[14px] text-cream">{s.value}</div>
 							<div className="font-pixel text-[7px] text-muted uppercase mt-0.5">
 								{s.label}
 							</div>
@@ -49,9 +48,7 @@ export default function GameStatsPanel({
 			{/* Move Log — fills remaining space down to footer */}
 			<div className="pixel-border bg-bg2 p-0 flex-1 flex flex-col min-h-0 overflow-hidden">
 				<div className="px-4 py-2.5 border-b-2 border-border-pixel flex items-center justify-between shrink-0">
-					<span className="font-pixel text-[9px] text-accent">
-						MOVE LOG
-					</span>
+					<span className="font-pixel text-[9px] text-accent">MOVE LOG</span>
 					<span className="font-pixel text-[8px] text-muted">
 						{moveLog.length}
 					</span>
@@ -72,13 +69,12 @@ export default function GameStatsPanel({
 						const col = m.cell % boardSize;
 						return (
 							<div
+								// biome-ignore lint/suspicious/noArrayIndexKey: move log is append-only, index is stable
 								key={`move-${i}`}
 								className={`flex items-center gap-2 px-4 py-1.5 border-l-[3px] ${
 									m.player === 1 ? "border-l-primary" : "border-l-accent"
 								} ${
-									i === moveLog.length - 1
-										? "bg-accent/5 animate-slide-up"
-										: ""
+									i === moveLog.length - 1 ? "bg-accent/5 animate-slide-up" : ""
 								}`}>
 								<span className="font-pixel text-[8px] text-muted w-6 text-right">
 									{i + 1}.

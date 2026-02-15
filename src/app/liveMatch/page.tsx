@@ -11,11 +11,11 @@ import BoardLiveContainer from "@/components/ui/Containers/Games/Live/BoardLiveC
 import LiveContainer from "@/components/ui/Containers/Games/Live/LiveContainer";
 import SearchContainer from "@/components/ui/Containers/Games/Live/SearchContainer";
 import Spinner from "@/components/ui/Feedback/Spinner";
-import GameLayout from "@/components/ui/Layout/GameLayout";
 import GameTopBar, { GameStatusBar } from "@/components/ui/Game/GameTopBar";
+import GameLayout from "@/components/ui/Layout/GameLayout";
 import SearchLabel from "@/components/ui/Title/SearchLabel";
-import { useUser } from "@/services/store";
 import { TOAST_DURATION, TOAST_IDS } from "@/constants/toast";
+import { useUser } from "@/services/store";
 
 const SERVER_URL = "https://notakto-websocket.onrender.com";
 const socket = io(SERVER_URL);

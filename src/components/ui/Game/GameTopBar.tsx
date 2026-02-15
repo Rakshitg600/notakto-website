@@ -1,7 +1,7 @@
 "use client";
 
-import type { BoardState } from "@/services/types";
 import { isBoardDead } from "@/services/logic";
+import type { BoardState } from "@/services/types";
 
 export interface MoveLogEntry {
 	player: 1 | 2;
@@ -32,18 +32,14 @@ export default function GameTopBar({
 	boardSize,
 	gameOver,
 }: GameTopBarProps) {
-	const aliveCount = boards.filter(
-		(b) => !isBoardDead(b, boardSize),
-	).length;
+	const aliveCount = boards.filter((b) => !isBoardDead(b, boardSize)).length;
 
 	return (
 		<div className="flex items-center justify-between gap-4 px-6 py-4 shrink-0">
 			{/* Player 1 panel */}
 			<div
 				className={`flex items-center gap-3 px-5 py-3.5 pixel-border flex-1 min-w-0 transition-colors ${
-					currentPlayer === 1 && !gameOver
-						? "border-accent"
-						: ""
+					currentPlayer === 1 && !gameOver ? "border-accent" : ""
 				}`}>
 				{currentPlayer === 1 && !gameOver && (
 					<div className="w-1.5 self-stretch bg-accent animate-pulse-pixel shrink-0" />
@@ -67,6 +63,7 @@ export default function GameTopBar({
 						const dead = isBoardDead(board, boardSize);
 						return (
 							<div
+								// biome-ignore lint/suspicious/noArrayIndexKey: board index is the stable identity
 								key={`dot-${i}`}
 								className={`w-3.5 h-3.5 transition-all duration-300 ${
 									dead
@@ -85,9 +82,7 @@ export default function GameTopBar({
 			{/* Player 2 panel */}
 			<div
 				className={`flex items-center gap-3 px-5 py-3.5 pixel-border flex-1 min-w-0 transition-colors ${
-					currentPlayer === 2 && !gameOver
-						? "border-accent"
-						: ""
+					currentPlayer === 2 && !gameOver ? "border-accent" : ""
 				}`}>
 				<div className="min-w-0 flex-1 text-right">
 					<div className="font-pixel text-[12px] text-cream uppercase tracking-wider truncate">

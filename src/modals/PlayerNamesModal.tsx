@@ -81,7 +81,9 @@ const PlayerNamesModal = ({
 				</PlayerNameFormContainer>
 
 				<div className="flex justify-center gap-4">
-					<PlayerStartButton onClick={handleSubmit}>Start Game</PlayerStartButton>
+					<PlayerStartButton onClick={handleSubmit}>
+						Start Game
+					</PlayerStartButton>
 					{onClose && (
 						<button
 							type="button"
