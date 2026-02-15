@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { signInWithGoogle, signOutUser } from "@/services/firebase";
 import { useGlobalModal } from "@/services/globalModal";
 import { useSidebar } from "@/services/sidebar";
@@ -164,17 +164,15 @@ function NavLink({
 export default function Sidebar() {
 	const { isCollapsed, toggle, setCollapsed } = useSidebar();
 	const pathname = usePathname();
-	const hasAutoCollapsed = useRef(false);
 	const { openModal } = useGlobalModal();
-	const user = useUser((s) => s.user);
-	const { tooltip, showTooltip, hideTooltip } = useSidebarTooltip(isCollapsed);
 
 	useEffect(() => {
-		if (!hasAutoCollapsed.current && GAME_PAGES.includes(pathname)) {
-			setCollapsed(true);
-			hasAutoCollapsed.current = true;
+		if (GAME_PAGES.includes(pathname)) {
+			setCollapsed(false);
 		}
 	}, [pathname, setCollapsed]);
+	const user = useUser((s) => s.user);
+	const { tooltip, showTooltip, hideTooltip } = useSidebarTooltip(isCollapsed);
 
 	const handleAuth = async () => {
 		if (user) {

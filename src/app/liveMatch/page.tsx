@@ -26,11 +26,12 @@ const LiveMode = () => {
 	const user = useUser((s) => s.user);
 	const authReady = useUser((s) => s.authReady);
 
-	// Redirect to menu if not authenticated
 	useEffect(() => {
 		if (!authReady) return;
 		if (!user) {
-			toast.error("Sign in to play live matches");
+			toast("Please sign in!", {
+				toastId: TOAST_IDS.User.SignInError,
+			});
 			router.push("/");
 		}
 	}, [authReady, user, router]);

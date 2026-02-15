@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { useShortcut } from "@/components/hooks/useShortcut";
+import { TOAST_IDS } from "@/constants/toast";
 import Board from "@/components/ui/Board/Board";
 import BoardDisplay from "@/components/ui/Game/BoardDisplay";
 import BoardSelector from "@/components/ui/Game/BoardSelector";
@@ -626,7 +627,9 @@ const Game = () => {
 	useEffect(() => {
 		if (!authReady) return;
 		if (!user) {
-			toast.error("User not authenticated");
+			toast("Please sign in!", {
+				toastId: TOAST_IDS.User.SignInError,
+			});
 			router.push("/");
 			return;
 		}
