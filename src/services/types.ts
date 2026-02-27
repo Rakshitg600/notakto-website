@@ -385,3 +385,82 @@ export type MenuModalType =
 	| "tutorial"
 	| "profile"
 	| null;
+
+// GLOBAL MODAL TYPE (union of all possible modals across pages)
+
+export type GlobalModalType =
+	| "soundConfig"
+	| "shortcut"
+	| "tutorial"
+	| "profile"
+	| "resetConfirmation"
+	| "exitConfirmation"
+	| "boardConfig"
+	| "difficulty"
+	| "names"
+	| "winner"
+	| null;
+
+// GLOBAL MODAL STORE
+
+export interface GlobalModalStore {
+	activeModal: GlobalModalType;
+	openModal: (modal: GlobalModalType) => void;
+	closeModal: () => void;
+}
+
+// SIDEBAR STORE
+
+export interface SidebarStore {
+	isCollapsed: boolean;
+	toggle: () => void;
+	setCollapsed: (v: boolean) => void;
+}
+
+// PIXEL UI COMPONENT TYPES
+
+export type PixelButtonVariant =
+	| "primary"
+	| "accent"
+	| "danger"
+	| "ghost"
+	| "success";
+export type PixelButtonSize = "sm" | "md" | "lg";
+
+export interface PixelButtonProps
+	extends ButtonHTMLAttributes<HTMLButtonElement> {
+	children: ReactNode;
+	variant?: PixelButtonVariant;
+	size?: PixelButtonSize;
+	loading?: boolean;
+}
+
+export type PixelBorderVariant = "default" | "primary" | "accent";
+
+export interface PixelBorderProps {
+	children: ReactNode;
+	variant?: PixelBorderVariant;
+	className?: string;
+}
+
+export type HeadingSize = "xs" | "sm" | "md" | "lg";
+export type HeadingColor = "cream" | "primary" | "accent" | "muted";
+
+export interface HeadingProps {
+	children: ReactNode;
+	size?: HeadingSize;
+	color?: HeadingColor;
+	className?: string;
+}
+
+// SIDEBAR COMPONENT TYPES
+
+export interface SidebarTooltipProps {
+	label: string;
+	show: boolean;
+	anchorRect: DOMRect | null;
+}
+
+export interface SidebarMarginProps {
+	children: ReactNode;
+}

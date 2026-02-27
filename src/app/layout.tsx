@@ -5,6 +5,9 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { VT323 } from "next/font/google";
 import ClientSideInit from "@/app/ClientSideInit";
 import MusicProvider from "@/components/MusicProvider";
+import MobileBottomNav from "@/components/ui/MobileBottomNav/MobileBottomNav";
+import Sidebar from "@/components/ui/Sidebar/Sidebar";
+import SidebarMargin from "@/components/ui/SidebarMargin/SidebarMargin";
 import { CustomToastContainer } from "@/components/ui/Toasts/CustomToastContainer";
 
 export const metadata: Metadata = {
@@ -45,9 +48,11 @@ export default function RootLayout({
 				/>
 				<meta name="monetag" content="31cbc3974b21341db36f756db33d15d6"></meta>
 			</head>
-			<body>
+			<body className="bg-bg0 text-pixel-white">
 				<MusicProvider />
-				{children}
+				<Sidebar />
+				<MobileBottomNav />
+				<SidebarMargin>{children}</SidebarMargin>
 				<CustomToastContainer />
 				<Analytics />
 				<SpeedInsights />
