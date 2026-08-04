@@ -26,3 +26,19 @@ export const PaymentStatusResponseSchema = z.object({
 });
 
 export type PaymentStatusResponse = z.infer<typeof PaymentStatusResponseSchema>;
+
+export const BuyCoinPackageSchema = z.object({
+	packageId: z.string(),
+	packageName: z.string(),
+	coins: z.number().int(),
+	visualCoins: z.number().int(),
+	amountCents: z.number().int(),
+	currency: z.string(),
+	defaultPackage: z.boolean(),
+});
+
+export const CoinPackagesResponseSchema = z.object({
+	coinPackages: z.array(BuyCoinPackageSchema),
+});
+
+export type CoinPackagesResponse = z.infer<typeof CoinPackagesResponseSchema>;

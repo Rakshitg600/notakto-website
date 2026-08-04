@@ -3,6 +3,7 @@ import type {
 	BuyCoinsFlowStatus,
 	BuyCoinsProviderStatus,
 } from "@/features/buy-coins/model/types";
+import { formatCents } from "@/shared/lib/formatCents";
 import BuyCoinsCheckoutSummaryLabel from "@/widgets/buy-coins-checkout-summary-label/ui/BuyCoinsCheckoutSummaryLabel";
 import BuyCoinsStatusLine from "@/widgets/buy-coins-status-line/ui/BuyCoinsStatusLine";
 
@@ -17,11 +18,11 @@ interface BuyCoinsCheckoutSummaryProps {
 	onOpenCheckout: () => void;
 	onStartCheckout: () => void;
 	providerStatus: BuyCoinsProviderStatus;
-	selectedPackage: BuyCoinPackage;
-}
-
-function formatCents(amountCents: number) {
-	return `$${(amountCents / 100).toFixed(2)}`;
+	selectedPackage: BuyCoinPackage | undefined;
+	packagesError: string | null;
+	packagesLoading: boolean;
+	retryFetchPackages: () => void;
+	packages: BuyCoinPackage[] | undefined;
 }
 
 function getActionLabel(flowStatus: BuyCoinsFlowStatus) {
@@ -43,7 +44,44 @@ export default function BuyCoinsCheckoutSummary({
 	onStartCheckout,
 	providerStatus,
 	selectedPackage,
+	packagesError,
+	packagesLoading,
+	retryFetchPackages,
+	packages,
 }: BuyCoinsCheckoutSummaryProps) {
+	if (packagesLoading) {
+		return (
+			<aside className="bg-bg2 p-10 pixel-border">
+				<p className="font-pixel text-xs">
+					{/* Need to add the custom loader later... */}
+					Loading packages...
+				</p>
+			</aside>
+		);
+	}
+
+	if (packagesError) {
+		return (
+			<div className="flex items-center justify-center flex-col gap-5">
+				<p className="text-sm">{packagesError}</p>
+				<button
+					className="pixel-border px-4 py-2 font-semibold cursor-pointer hover:bg-white/10 active:translate-y-px transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+					type="button"
+					onClick={retryFetchPackages}>
+					Retry
+				</button>
+			</div>
+		);
+	}
+
+	if (packages && packages.length === 0) {
+		return <p className="text-sm">No coin packages are available.</p>;
+	}
+
+	if (!selectedPackage) {
+		return null;
+	}
+
 	const creditedTotal = currentCoins + selectedPackage.coins;
 
 	return (
@@ -54,7 +92,7 @@ export default function BuyCoinsCheckoutSummary({
 			<div className="space-y-0 border-t-3 border-border-pixel font-pixel">
 				<BuyCoinsCheckoutSummaryLabel
 					title={"Package"}
-					content={selectedPackage.name}
+					content={selectedPackage.packageName}
 					textColor={"text-pixel-white"}
 				/>
 				<BuyCoinsCheckoutSummaryLabel
@@ -64,7 +102,7 @@ export default function BuyCoinsCheckoutSummary({
 				/>
 				<BuyCoinsCheckoutSummaryLabel
 					title={"Total"}
-					content={`${selectedPackage.cost}$`}
+					content={`${formatCents(selectedPackage.amountCents)}`}
 					textColor={"text-accent"}
 				/>
 				<BuyCoinsCheckoutSummaryLabel

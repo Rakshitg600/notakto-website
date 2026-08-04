@@ -5,13 +5,11 @@ import { signInWithGoogle } from "@/features/authenticate-user/api/firebase";
 import { useUser } from "@/features/authenticate-user/model/userStore";
 import {
 	createCharge,
+	getCoinPackages,
 	getPaymentStatus,
 } from "@/features/buy-coins/api/buyCoinsApis";
-import {
-	BUY_COIN_PACKAGES,
-	DEFAULT_BUY_COIN_PACKAGE_ID,
-} from "@/features/buy-coins/model/packages";
 import type {
+	BuyCoinPackage,
 	BuyCoinsFlowStatus,
 	BuyCoinsProviderStatus,
 } from "@/features/buy-coins/model/types";
@@ -20,6 +18,7 @@ import { useCoins, useXP } from "@/features/manage-wallet/model/walletStore";
 
 const PAYMENT_POLL_INTERVAL_MS = 5000;
 const PAYMENT_POLL_TIMEOUT_MS = 5 * 60 * 1000;
+// const DEFAULT_BUY_COIN_PACKAGE_ID = "pkg_1200";
 
 export function useBuyCoinsFlow() {
 	const user = useUser((state) => state.user);
@@ -28,9 +27,10 @@ export function useBuyCoinsFlow() {
 	const setCoins = useCoins((state) => state.setCoins);
 	const setXP = useXP((state) => state.setXP);
 
-	const [selectedPackageId, setSelectedPackageId] = useState(
-		DEFAULT_BUY_COIN_PACKAGE_ID,
+	const [selectedPackageId, setSelectedPackageId] = useState<string | null>(
+		null,
 	);
+
 	const [flowStatus, setFlowStatus] = useState<BuyCoinsFlowStatus>("idle");
 	const [providerStatus, setProviderStatus] =
 		useState<BuyCoinsProviderStatus>(null);
@@ -41,16 +41,64 @@ export function useBuyCoinsFlow() {
 		number | null
 	>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [packages, setPackages] = useState<BuyCoinPackage[]>([]);
+	const [packagesLoading, setPackagesLoading] = useState(false);
+	const [packagesError, setPackagesError] = useState<string | null>(null);
 
 	const pollingIntervalRef = useRef<number | null>(null);
 	const pollingDeadlineRef = useRef<number | null>(null);
 
 	const selectedPackage = useMemo(
-		() =>
-			BUY_COIN_PACKAGES.find((item) => item.id === selectedPackageId) ??
-			BUY_COIN_PACKAGES[0],
-		[selectedPackageId],
+		() => packages.find((item) => item.packageId === selectedPackageId),
+		[selectedPackageId, packages],
 	);
+
+	const fetchPackages = useCallback(async () => {
+		if (!user) return;
+
+		setPackagesLoading(true);
+		setPackagesError(null);
+
+		try {
+			const idToken = await user.getIdToken();
+			const result = await getCoinPackages(idToken);
+
+			if (!result.success) {
+				setPackagesError("Could not fetch packages");
+				return;
+			}
+
+			const coinPackages = result.coinPackages;
+
+			setPackages(coinPackages);
+
+			setSelectedPackageId((currentId) => {
+				if (
+					currentId &&
+					coinPackages.some(
+						(coinPackage) => coinPackage.packageId === currentId,
+					)
+				) {
+					return currentId;
+				}
+
+				const defaultPackage = coinPackages.find(
+					(coinPackage) => coinPackage.defaultPackage,
+				);
+
+				return defaultPackage?.packageId ?? coinPackages[0]?.packageId ?? null;
+			});
+		} catch (error) {
+			console.error("Could not fetch packages", error);
+			setPackagesError("Could not fetch packages");
+		} finally {
+			setPackagesLoading(false);
+		}
+	}, [user]);
+
+	useEffect(() => {
+		void fetchPackages();
+	}, [fetchPackages]);
 
 	const stopPolling = useCallback(() => {
 		if (pollingIntervalRef.current !== null) {
@@ -168,6 +216,11 @@ export function useBuyCoinsFlow() {
 			return;
 		}
 
+		if (!selectedPackage) {
+			setError("No coin package selected");
+			return;
+		}
+
 		stopPolling();
 		setFlowStatus("creating");
 		setProviderStatus(null);
@@ -179,7 +232,12 @@ export function useBuyCoinsFlow() {
 
 		try {
 			const idToken = await user.getIdToken();
-			const chargeResult = await createCharge(selectedPackage.id, idToken);
+
+			const chargeResult = await createCharge(
+				selectedPackage.packageId,
+				idToken,
+			);
+
 			if (!chargeResult.success) {
 				setFlowStatus("failed");
 				setError(chargeResult.error);
@@ -195,7 +253,7 @@ export function useBuyCoinsFlow() {
 			setFlowStatus("failed");
 			setError("Failed to start checkout");
 		}
-	}, [openHostedCheckout, selectedPackage.id, startPolling, stopPolling, user]);
+	}, [openHostedCheckout, selectedPackage, startPolling, stopPolling, user]);
 
 	const signIn = useCallback(async () => {
 		setError(null);
@@ -220,7 +278,10 @@ export function useBuyCoinsFlow() {
 		hostedUrl,
 		isBusy: flowStatus === "creating" || flowStatus === "polling",
 		openHostedCheckout,
-		packages: BUY_COIN_PACKAGES,
+		packages,
+		packagesError,
+		packagesLoading,
+		retryFetchPackages: fetchPackages,
 		providerStatus,
 		resetPaymentState,
 		selectPackage,
