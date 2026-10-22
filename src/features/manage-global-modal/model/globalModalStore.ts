@@ -12,7 +12,10 @@ type GlobalModalType =
 	| "difficulty"
 	| "names"
 	| "winner"
+	| "leaderboard"
 	| null;
+
+export type ModalAction = NonNullable<GlobalModalType>;
 
 interface GlobalModalStore {
 	activeModal: GlobalModalType;
