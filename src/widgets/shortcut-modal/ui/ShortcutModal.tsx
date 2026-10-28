@@ -7,6 +7,7 @@ import ShortcutContainer from "@/widgets/shortcut-container/ui/ShortcutContainer
 import ShortcutList from "@/widgets/shortcut-list/ui/ShortcutList";
 import { pageShortcuts } from "@/widgets/shortcut-modal/constants";
 import ShortcutTitle from "@/widgets/shortcut-title/ui/ShortcutTitle";
+import ShortcutToggle from "@/widgets/shortcut-toggle/ui/ShortcutToggle";
 
 interface ShortcutModalProps {
 	visible: boolean;
@@ -25,7 +26,10 @@ export default function ShortcutModal({
 	return (
 		<ModalOverlay>
 			<ShortcutContainer>
-				<ShortcutTitle text="Keyboard Shortcuts" />
+				<div className="flex items-center justify-between mb-2">
+					<ShortcutTitle text="Keyboard Shortcuts" />
+					<ShortcutToggle />
+				</div>
 
 				<ShortcutList shortcuts={shortcuts} />
 
