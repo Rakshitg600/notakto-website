@@ -5,7 +5,7 @@ interface WalletValueProps {
 
 export default function WalletValue({ value, label }: WalletValueProps) {
 	return (
-		<span className=" text-[10px] text-yellow-600">
+		<span className=" text-[10px] text-yellow-500">
 			{value} {label}
 		</span>
 	);

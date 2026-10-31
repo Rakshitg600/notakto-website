@@ -20,7 +20,7 @@ export default function BuyCoinsCoinStack({ count }: BuyCoinsCoinStackProps) {
 				<span
 					key={position}
 					className={clsx(
-						"absolute h-9 w-9 border-4 border-yellow-600 bg-[#f0c45a] shadow-[3px_3px_0_var(--color-zinc-950)]",
+						"absolute h-9 w-9 border-4 border-yellow-500 bg-[#f0c45a] shadow-[3px_3px_0_var(--color-slate-950)]",
 						position,
 					)}>
 					<span className="absolute inset-2 border-3 border-yellow-700" />

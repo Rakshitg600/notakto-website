@@ -18,11 +18,11 @@ export default function BuyCoinsLoginPrompt({
 				type="button"
 				disabled={!authReady}
 				onClick={onSignIn}
-				className="w-50 lg:w-100 border-3 border-slate-600 bg-orange-700 px-5 py-3  text-[9px] uppercase tracking-wider text-stone-300 shadow-[3px_3px_0_var(--color-zinc-950)] hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60">
+				className="w-50 lg:w-100 border-3 border-zinc-600 bg-rose-700 px-5 py-3  text-[9px] uppercase tracking-wider text-stone-300 shadow-[3px_3px_0_var(--color-slate-950)] hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60">
 				SIGN IN
 			</button>
 			{error && (
-				<p className="mt-4  text-[7px] uppercase leading-5 text-orange-700">
+				<p className="mt-4  text-[7px] uppercase leading-5 text-rose-700">
 					{error}
 				</p>
 			)}

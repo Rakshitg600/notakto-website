@@ -75,7 +75,7 @@ export default function MobileBottomNav({
 						className="fixed inset-0 z-998 md:hidden"
 						onClick={() => setMoreOpen(false)}
 					/>
-					<div className="fixed bottom-14 right-2 z-999 bg-gray-900 border-3 border-slate-700 p-2 flex flex-col gap-1 md:hidden shadow-[3px_3px_0_var(--color-zinc-950)]">
+					<div className="fixed bottom-14 right-2 z-999 bg-slate-900 border-3 border-gray-700 p-2 flex flex-col gap-1 md:hidden shadow-[3px_3px_0_var(--color-slate-950)]">
 						{isGamePage &&
 							pageGameButtons.map((item) => (
 								<button
@@ -90,7 +90,7 @@ export default function MobileBottomNav({
 								</button>
 							))}
 						{isGamePage && pageGameButtons.length > 0 && (
-							<div className="h-0.5 bg-slate-700 my-1" />
+							<div className="h-0.5 bg-gray-700 my-1" />
 						)}
 						{walletItems.map((item) => (
 							<button
@@ -100,12 +100,12 @@ export default function MobileBottomNav({
 									openModal(item.modal);
 									setMoreOpen(false);
 								}}
-								className=" text-[8px] text-yellow-600 hover:text-stone-200 hover:bg-slate-800 px-3 py-2 text-left uppercase tracking-wider cursor-pointer whitespace-nowrap">
+								className=" text-[8px] text-yellow-500 hover:text-orange-50 hover:bg-slate-800 px-3 py-2 text-left uppercase tracking-wider cursor-pointer whitespace-nowrap">
 								{item.icon} {item.label}
 							</button>
 						))}
 						{walletItems.length > 0 && (
-							<div className="h-0.5 bg-slate-700 my-1" />
+							<div className="h-0.5 bg-gray-700 my-1" />
 						)}
 						{modalItems.map((item) => (
 							<button
@@ -119,7 +119,7 @@ export default function MobileBottomNav({
 								{item.icon} {item.label}
 							</button>
 						))}
-						<div className="h-0.5 bg-slate-700 my-1" />
+						<div className="h-0.5 bg-gray-700 my-1" />
 						{navItems.slice(3).map((item) =>
 							"external" in item && item.external ? (
 								<a
@@ -141,14 +141,14 @@ export default function MobileBottomNav({
 								</Link>
 							),
 						)}
-						<div className="h-0.5 bg-slate-700 my-1" />
+						<div className="h-0.5 bg-gray-700 my-1" />
 						<button
 							type="button"
 							onClick={handleAuth}
 							className={` text-[8px] px-3 py-2 text-left uppercase tracking-wider cursor-pointer whitespace-nowrap ${
 								user
 									? "text-stone-400 hover:text-stone-300 hover:bg-slate-800"
-									: "text-orange-700 hover:text-red-500 hover:bg-slate-800"
+									: "text-rose-700 hover:text-rose-600 hover:bg-slate-800"
 							}`}>
 							{user ? "< SIGN OUT" : "> SIGN IN"}
 						</button>
@@ -156,7 +156,7 @@ export default function MobileBottomNav({
 				</>
 			)}
 
-			<nav className="fixed bottom-0 left-0 right-0 h-14 bg-gray-900 border-t-3 border-slate-700 z-50 flex md:hidden items-center justify-around px-1">
+			<nav className="fixed bottom-0 left-0 right-0 h-14 bg-slate-900 border-t-3 border-gray-700 z-50 flex md:hidden items-center justify-around px-1">
 				{MOBILE_NAV_ITEMS.map((item) => {
 					const isActive = pathname === item.href;
 					return (
@@ -165,7 +165,7 @@ export default function MobileBottomNav({
 							href={item.href}
 							className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1  ${
 								isActive
-									? "text-yellow-600"
+									? "text-yellow-500"
 									: "text-stone-400 hover:text-stone-300"
 							}`}>
 							<span className="text-[12px]">{item.icon}</span>
@@ -179,7 +179,7 @@ export default function MobileBottomNav({
 					type="button"
 					onClick={() => setMoreOpen(!moreOpen)}
 					className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1  cursor-pointer ${
-						moreOpen ? "text-yellow-600" : "text-stone-400 hover:text-stone-300"
+						moreOpen ? "text-yellow-500" : "text-stone-400 hover:text-stone-300"
 					}`}>
 					<span className="text-[12px]">...</span>
 					<span className="text-[6px] uppercase tracking-wider">MORE</span>

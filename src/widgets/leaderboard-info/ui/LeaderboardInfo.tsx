@@ -38,8 +38,8 @@ export function LeaderboardInfo() {
 				aria-label="How the leaderboard is ranked"
 				aria-expanded={open}
 				className={clsx(
-					"p-2 -m-2 text-stone-300/70 hover:text-yellow-600 transition-colors cursor-pointer",
-					open && "text-yellow-600",
+					"p-2 -m-2 text-stone-300/70 hover:text-yellow-500 transition-colors cursor-pointer",
+					open && "text-yellow-500",
 				)}>
 				<CircleHelp size={18} />
 			</button>
@@ -48,7 +48,7 @@ export function LeaderboardInfo() {
 				<div
 					role="tooltip"
 					className="absolute right-0 top-full mt-3 w-[min(20rem,80vw)] z-20 bg-gray-800 pixel-border p-3 sm:p-4 text-left  text-xs normal-case tracking-normal leading-relaxed text-stone-300">
-					<p className="uppercase tracking-widest text-yellow-600 mb-2">
+					<p className="uppercase tracking-widest text-yellow-500 mb-2">
 						How ranking works
 					</p>
 

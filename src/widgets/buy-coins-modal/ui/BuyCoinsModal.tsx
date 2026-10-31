@@ -19,7 +19,7 @@ function BuyCoinsModalContent({ onClose }: { onClose?: () => void }) {
 			<div className="max-h-[92vh] w-[95%] max-w-5xl overflow-y-auto bg-gray-800 p-4 md:p-6 pixel-border">
 				<div className="mb-5 flex items-start justify-between gap-4">
 					<div>
-						<h2 className=" text-sm uppercase tracking-widest text-yellow-600 md:text-base">
+						<h2 className=" text-sm uppercase tracking-widest text-yellow-500 md:text-base">
 							Buy Coins
 						</h2>
 						<p className="mt-2  text-[9px] uppercase leading-5 text-stone-400">
@@ -30,7 +30,7 @@ function BuyCoinsModalContent({ onClose }: { onClose?: () => void }) {
 						type="button"
 						aria-label="Close buy coins"
 						onClick={onClose}
-						className="h-10 w-10 shrink-0 border-3 border-slate-700 bg-slate-800  text-[10px] text-stone-400 shadow-[3px_3px_0_var(--color-zinc-950)] hover:text-stone-300">
+						className="h-10 w-10 shrink-0 border-3 border-gray-700 bg-slate-800  text-[10px] text-stone-400 shadow-[3px_3px_0_var(--color-slate-950)] hover:text-stone-300">
 						X
 					</button>
 				</div>

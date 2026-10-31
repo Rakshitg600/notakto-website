@@ -23,11 +23,11 @@ export default function CellButton({
 				"relative flex items-center justify-center aspect-square",
 				disabled
 					? "bg-gray-800"
-					: "bg-zinc-900 hover:bg-gray-900 cursor-pointer",
+					: "bg-slate-950 hover:bg-slate-900 cursor-pointer",
 				isLastMove
 					? owner === 2
 						? "border-2 border-yellow-400 shadow-[inset_0_0_8px_rgba(250,204,21,0.4)]"
-						: "border-2 border-red-500 shadow-[inset_0_0_8px_rgba(196,60,60,0.4)]"
+						: "border-2 border-rose-600 shadow-[inset_0_0_8px_rgba(196,60,60,0.4)]"
 					: "border border-slate-800",
 			)}>
 			{children}

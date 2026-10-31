@@ -24,7 +24,7 @@ export default function WalletBadge({
 						type="button"
 						aria-label="Buy coins"
 						onClick={onBuyCoins}
-						className="h-6 w-6 border-3 border-yellow-600 bg-slate-800  text-[12px] leading-none text-yellow-600 shadow-[2px_2px_0_var(--color-zinc-950)] hover:bg-orange-700 hover:text-stone-300 cursor-pointer">
+						className="h-6 w-6 border-3 border-yellow-500 bg-slate-800  text-[12px] leading-none text-yellow-500 shadow-[2px_2px_0_var(--color-slate-950)] hover:bg-rose-700 hover:text-stone-300 cursor-pointer">
 						+
 					</button>
 				</>

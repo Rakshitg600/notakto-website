@@ -87,11 +87,11 @@ export default function ProfileUsernameRow({ value }: ProfileNameRowProps) {
 						className="
 							h-8 w-[85%] md:w-68
 							border border-stone-300
-							bg-zinc-950
+							bg-slate-950
 							px-2
 							 text-[11px] text-stone-300
 							outline-none
-							focus:border-orange-700
+							focus:border-rose-700
 						"
 					/>
 				) : (
@@ -111,10 +111,10 @@ export default function ProfileUsernameRow({ value }: ProfileNameRowProps) {
 						className="
 							flex size-8 shrink-0
 							items-center justify-center
-							border border-orange-700
+							border border-rose-700
 							bg-[#c43c3c]
 							text-stone-300
-							shadow-[2px_2px_0_var(--color-zinc-950)]
+							shadow-[2px_2px_0_var(--color-slate-950)]
 							transition-colors
 							hover:bg-[#d44a4a]
 							disabled:cursor-not-allowed
@@ -141,10 +141,10 @@ export default function ProfileUsernameRow({ value }: ProfileNameRowProps) {
 						className="
 							flex size-8 shrink-0
 							items-center justify-center
-							border border-slate-600
+							border border-zinc-600
 							bg-slate-800
 							text-stone-400
-							shadow-[2px_2px_0_var(--color-zinc-950)]
+							shadow-[2px_2px_0_var(--color-slate-950)]
 							transition-colors
 							hover:text-stone-300
 							disabled:cursor-not-allowed
@@ -163,12 +163,12 @@ export default function ProfileUsernameRow({ value }: ProfileNameRowProps) {
 					className="
 						flex size-8 shrink-0
 						items-center justify-center
-						border border-slate-600
+						border border-zinc-600
 						bg-slate-800
 						text-stone-300
-						shadow-[2px_2px_0_var(--color-zinc-950)]
+						shadow-[2px_2px_0_var(--color-slate-950)]
 						transition-colors
-						hover:text-orange-700
+						hover:text-rose-700
 					">
 					<Pencil size={16} strokeWidth={2} />
 				</button>

@@ -10,8 +10,8 @@ export default function BoardPreviewStatusDot({
 	return (
 		<span
 			className={clsx(
-				"w-2.5 h-2.5 rounded-full border border-zinc-950",
-				dead ? "bg-gray-800" : "bg-lime-700",
+				"w-2.5 h-2.5 rounded-full border border-slate-950",
+				dead ? "bg-gray-800" : "bg-green-700",
 			)}
 		/>
 	);

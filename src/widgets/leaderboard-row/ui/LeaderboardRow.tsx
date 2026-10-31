@@ -17,10 +17,10 @@ export function LeaderboardRow({
 				"border-b border-stone-300/10 text-[8px] md:text-sm",
 
 				// Current player: subtle red-tinted surface.
-				isCurrentUser && "bg-orange-700/10",
+				isCurrentUser && "bg-rose-700/10",
 
 				// Normal leaderboard ranking colors.
-				!isCurrentUser && rank === 1 && "text-yellow-600",
+				!isCurrentUser && rank === 1 && "text-yellow-500",
 				!isCurrentUser && rank === 2 && "text-[#C9D1D9]",
 				!isCurrentUser && rank === 3 && "text-[#CD7F32]",
 				!isCurrentUser && rank > 3 && "text-stone-300",
@@ -30,7 +30,7 @@ export function LeaderboardRow({
 					"py-2 sm:py-3 px-1 sm:px-3 text-left whitespace-nowrap",
 
 					// Red rail identifies the current player.
-					isCurrentUser && "border-l-2 border-orange-700 text-stone-300",
+					isCurrentUser && "border-l-2 border-rose-700 text-stone-300",
 				)}>
 				#{rank}
 			</td>
@@ -42,11 +42,11 @@ export function LeaderboardRow({
 					<span
 						className={clsx(
 							"ml-2 mb-1 inline-block",
-							"border border-orange-700/50",
-							"bg-orange-700/15",
+							"border border-rose-700/50",
+							"bg-rose-700/15",
 							"px-1.5 py-0.5",
 							"text-[6px] sm:text-[8px]",
-							"leading-none text-orange-700",
+							"leading-none text-rose-700",
 							"align-middle",
 						)}>
 						YOU

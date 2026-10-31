@@ -31,7 +31,7 @@ export default function SidebarActionButton({
 			className={clsx(
 				"w-full flex items-center gap-3 px-4 py-3  text-[8px] uppercase tracking-wider hover:bg-slate-800 border-l-3 border-transparent transition-colors duration-100 cursor-pointer",
 				variant === "accent"
-					? "text-yellow-600 hover:text-stone-200 hover:border-yellow-600"
+					? "text-yellow-500 hover:text-orange-50 hover:border-yellow-500"
 					: "text-stone-400 hover:text-stone-300",
 			)}>
 			<SidebarNavIcon icon={icon} />

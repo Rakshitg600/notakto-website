@@ -18,7 +18,7 @@ export default function CellValueDisplay({
 					"text-xl  leading-none",
 					owner === 2
 						? "text-yellow-400 drop-shadow-[0_0_4px_rgba(250,204,21,0.6)]"
-						: "text-orange-700 drop-shadow-[0_0_4px_rgba(196,60,60,0.6)]",
+						: "text-rose-700 drop-shadow-[0_0_4px_rgba(196,60,60,0.6)]",
 				)}>
 				{value}
 			</span>

@@ -9,7 +9,7 @@ export default function ProfileDetailValue({
 }: ProfileDetailValueProps) {
 	return (
 		<span
-			className={variant === "accent" ? "text-yellow-600" : "text-stone-300"}>
+			className={variant === "accent" ? "text-yellow-500" : "text-stone-300"}>
 			{value}
 		</span>
 	);
