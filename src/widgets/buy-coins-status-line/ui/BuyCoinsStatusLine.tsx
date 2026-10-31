@@ -36,17 +36,17 @@ export default function BuyCoinsStatusLine({
 	return (
 		<div
 			className={clsx(
-				"mt-4 flex items-start gap-2 font-pixel text-[8px] uppercase leading-5",
-				isSuccess && "text-success",
-				isFailure && "text-primary",
-				!isSuccess && !isFailure && "text-warning",
+				"mt-4 flex items-start gap-2  text-[8px] uppercase leading-5",
+				isSuccess && "text-lime-700",
+				isFailure && "text-orange-700",
+				!isSuccess && !isFailure && "text-yellow-600",
 			)}>
 			<span
 				className={clsx(
-					"mt-1 h-2.5 w-2.5 shrink-0 shadow-[2px_2px_0_var(--color-bg0)]",
-					isSuccess && "bg-success",
-					isFailure && "bg-primary",
-					!isSuccess && !isFailure && "bg-warning",
+					"mt-1 h-2.5 w-2.5 shrink-0 shadow-[2px_2px_0_var(--color-zinc-950)]",
+					isSuccess && "bg-lime-700",
+					isFailure && "bg-orange-700",
+					!isSuccess && !isFailure && "bg-yellow-600",
 				)}
 			/>
 			<span>{error ?? getStatusLabel(flowStatus, providerStatus)}</span>

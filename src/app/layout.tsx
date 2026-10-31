@@ -80,7 +80,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" className={pressStart2P.className}>
-			<body className="bg-bg0 text-pixel-white">
+			<body className="bg-zinc-950 text-stone-200">
 				<Script
 					src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4854199776978392"
 					strategy="beforeInteractive"

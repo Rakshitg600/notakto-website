@@ -8,7 +8,7 @@ export function WinnerButton({
 	return (
 		<button
 			className={clsx(
-				"bg-primary text-cream px-4 py-2 w-full text-[9px] font-pixel uppercase tracking-wider hover:bg-primary-hover border-3 border-border-light shadow-[3px_3px_0_var(--color-bg0)] cursor-pointer",
+				"bg-orange-700 text-stone-300 px-4 py-2 w-full text-[9px]  uppercase tracking-wider hover:bg-red-500 border-3 border-slate-600 shadow-[3px_3px_0_var(--color-zinc-950)] cursor-pointer",
 				className,
 			)}
 			{...props}

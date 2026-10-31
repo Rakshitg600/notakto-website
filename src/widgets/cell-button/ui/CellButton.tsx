@@ -21,12 +21,14 @@ export default function CellButton({
 			disabled={disabled}
 			className={clsx(
 				"relative flex items-center justify-center aspect-square",
-				disabled ? "bg-dead" : "bg-board-bg hover:bg-bg1 cursor-pointer",
+				disabled
+					? "bg-gray-800"
+					: "bg-zinc-900 hover:bg-gray-900 cursor-pointer",
 				isLastMove
 					? owner === 2
 						? "border-2 border-yellow-400 shadow-[inset_0_0_8px_rgba(250,204,21,0.4)]"
 						: "border-2 border-red-500 shadow-[inset_0_0_8px_rgba(196,60,60,0.4)]"
-					: "border border-bg3",
+					: "border border-slate-800",
 			)}>
 			{children}
 		</button>

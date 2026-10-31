@@ -3,7 +3,7 @@ export const MenuLayout = ({ children }: { children: React.ReactNode }) => (
 		className="
 			h-[calc(100dvh-3.5rem)]
 			md:h-dvh
-			bg-bg0
+			bg-zinc-950
 			flex
 			flex-col
 			items-center
